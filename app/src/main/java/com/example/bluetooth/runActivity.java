@@ -159,7 +159,7 @@ public class runActivity extends AppCompatActivity {
        // serverThread.start();
         //setResult(Activity.RESULT_OK, new Intent().putExtra("Device", (Bundle) null));
         //Запрос на включение местоположения!!! Нужно нормально доделать!
-        ActivityCompat.requestPermissions(this,new String[] { Manifest.permission.ACCESS_FINE_LOCATION },1);
+        ActivityCompat.requestPermissions(this,new String[] { Manifest.permission.ACCESS_COARSE_LOCATION },1);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             BtLe btLe=new BtLe(this);
             btLe.scanLeDevice();
