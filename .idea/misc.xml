@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/buttontheme.xml" value="0.4085" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/doqnlefttheme.xml" value="0.343" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/downbuttheme.xml" value="0.304" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/downrightarrowtheme.xml" value="0.4705" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/downrightbuttheme.xml" value="0.342" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/leftbuttheme.xml" value="0.304" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/rightbuttheme.xml" value="0.304" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/uparrowright.xml" value="0.5435" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/upbuttontheme.xml" value="0.296" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/upleftbutheme.xml" value="0.3035" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/activity_bt_le.xml" value="0.31354166666666666" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/activity_get_blu_devicec.xml" value="0.34427083333333336" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/activity_remote_control_car.xml" value="0.33" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/activity_run.xml" value="0.30185185185185187" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/content_remote_control.xml" value="0.34427083333333336" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/fragment_first.xml" value="0.511322463768116" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/fragment_second.xml" value="0.5067934782608695" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/list_item.xml" value="0.67" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/menu/main_menu.xml" value="0.3411458333333333" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/xml/list_item.xml" value="0.3651041666666667" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
