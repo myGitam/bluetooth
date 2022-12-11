@@ -1,12 +1,15 @@
 package com.example.bluetooth;
 
 import static androidx.core.app.ActivityCompat.requestPermissions;
+
 import android.Manifest;
+
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -51,9 +54,6 @@ public class BtLe {
     }
 
 
-
-
-    @SuppressLint("MissingPermission")
     public void scanLeDevice() {
 
         if (!scanning) {
@@ -65,16 +65,32 @@ public class BtLe {
                     scanning = false;
 
 
-                        bluetoothLeScanner.stopScan(leScanCallback);
-                        Log.d(TAG, "stopScan( ");
+                    bluetoothLeScanner.stopScan(leScanCallback);
+                    Log.d(TAG, "stopScan( ");
 
                 }
             }, SCAN_PERIOD);
 
             scanning = true;
 
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+
+                Log.d(TAG, "\"Scan permission denied\"");
+                //Запрос на включение местоположения!!! Нужно нормально доделать!
+                ActivityCompat.requestPermissions((Activity) context,new String[] {Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION },1);
+             return;
+            }
+            else {
                 bluetoothLeScanner.startScan(null, scanSettings, leScanCallback);
                 Log.d(TAG, "StartscanLeDevice: ");
+            }
 
         } else {
             scanning = false;
