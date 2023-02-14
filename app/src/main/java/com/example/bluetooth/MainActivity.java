@@ -118,8 +118,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG, "onActivityResult Main: no null");
                 Bundle s = result.getData().getExtras();
                 devToConnect=s.getParcelable("Device");
-                MenuItem item = menu.findItem(R.id.connectBlu);
-                item.setVisible(true);
+                MenuItem item = menu.findItem(R.id.connectBlu);// показать иконку
+                item.setVisible(true); // показать иконку
                 Log.d(TAG, "Result: DATA: " + devToConnect.getDevName()+" "+devToConnect.getPairBluDev());
 
             }else {
@@ -148,8 +148,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
           // Intent runIntent=new Intent(this,runActivity.class);
          //  startActivity(runIntent);
             //openRunActivity.launch(runIntent);
-            Intent intent=new Intent(this,runActivity.class);
-            openRunActivity.launch(intent);
+
+             Intent intent=new Intent(this,runActivity.class);
+             openRunActivity.launch(intent);
+
+             //Intent intent=new Intent(this,ScreenSlidePagerActivity.class);
+            // openRunActivity.launch(intent);
             break;
 
         case R.id.buttonSend:

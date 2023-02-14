@@ -1,12 +1,10 @@
 package com.example.bluetooth;
 
-import static androidx.core.app.ActivityCompat.requestPermissions;
-
 import android.Manifest;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -16,12 +14,16 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -39,22 +41,46 @@ public class BtLe {
     private static final String TAG = "MyApp";
     private BluetoothLeScanner bluetoothLeScanner;
     private boolean scanning;
+    boolean GpsStatus =false;
+    LocationManager locationManager ;
     private Handler handler = new Handler();
     Context context;
     private static final long SCAN_PERIOD = 10000;
+    private RecyclerView BtLerecyclerView;
+    //Class and list for BTLE
 
+    ArrayList<BtleFindingDev> btleFindingDevList = new ArrayList<BtleFindingDev>();//простой список уникальных устройств для адаптера
+    HashSet<BtleFindingDev> hashSetBlubtleFindingDevList = new HashSet<BtleFindingDev>(); // список промежуточный для всех найденных (могут повторяться) для этого 2 списка сделано чтоб писать только уникальные
+
+    //**Class and list for BTLE
     @RequiresApi(api = Build.VERSION_CODES.M)
 
+    public BtLe() {
+
+       // this.context = context;
+        bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+        locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+        GpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+    }
     public BtLe(Context context) {
 
         this.context = context;
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
-
+        locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+        GpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
     }
 
 
     public void scanLeDevice() {
+
+        if(GpsStatus == true) {
+            Log.d(TAG, "GpsStatus ENABLE");
+        } else {
+            Intent intent1 = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            context.startActivity(intent1);
+        }
 
         if (!scanning) {
             // Stops scanning after a predefined scan period.
@@ -66,7 +92,13 @@ public class BtLe {
 
 
                     bluetoothLeScanner.stopScan(leScanCallback);
-                    Log.d(TAG, "stopScan( ");
+                    Log.d(TAG, "stopScan(");
+                    //добавляю в простой список который передам адаптеру
+                    btleFindingDevList.addAll(hashSetBlubtleFindingDevList);
+                    for (BtleFindingDev c:btleFindingDevList) {
+                        Log.d(TAG, String.valueOf(c.getBTLEdevice().getName()));
+
+                    }
 
                 }
             }, SCAN_PERIOD);
@@ -88,6 +120,7 @@ public class BtLe {
              return;
             }
             else {
+
                 bluetoothLeScanner.startScan(null, scanSettings, leScanCallback);
                 Log.d(TAG, "StartscanLeDevice: ");
             }
@@ -96,18 +129,23 @@ public class BtLe {
             scanning = false;
 
                 bluetoothLeScanner.stopScan(leScanCallback);
-                Log.d(TAG, "stopScan( ");
+                Log.d(TAG, "Not permission");
 
         }
-    }
 
+    }
+    public ArrayList<BtleFindingDev> getList(){
+        return btleFindingDevList;
+    }
 
     @SuppressLint("NewApi")
     private final ScanCallback leScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
-            Log.d(TAG, "onScanResult: " + result);
+           // Log.d(TAG, "onScanResult: " + result);
+            hashSetBlubtleFindingDevList.add(new BtleFindingDev (result.getDevice())); //добавляю уникальный в хешсет
+
         }
 
         @Override

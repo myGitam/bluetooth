@@ -72,9 +72,12 @@ public class runActivity extends AppCompatActivity {
         //bluetoothManager = getSystemService(BluetoothManager.class);
         //bluetoothAdapter = bluetoothManager.getAdapter();
         //bluetoothAdapter=getBluetoothAdapter(); // получаю адаптер
-        Button ServerButton=findViewById(R.id.ServerButton);
-        ServerButton.setOnClickListener(this::myOnClick);
-
+      //  Button ServerButton=findViewById(R.id.ServerButton);
+     //   ServerButton.setOnClickListener(this::myOnClick);
+        Button scanBtLe=findViewById(R.id.scanBtLe);
+        scanBtLe.setOnClickListener(this::myOnClick);
+        Button ButRecView=findViewById(R.id.ButRecView);
+        ButRecView.setOnClickListener(this::myOnClick);
             Log.d(TAG, "ARGUMENTS ");
 
             bluetoothManager=getSystemService(BluetoothManager.class);
@@ -122,7 +125,6 @@ public class runActivity extends AppCompatActivity {
             // There are paired devices. Get the name and address of each paired device.
             for (BluetoothDevice device : pairedDevices) {
                 pairedDevicesList.add(new PairedDev(device,device.getName())); //записываю в список все спаренные девайсы
-
                 String deviceName = device.getName();
                 String deviceHardwareAddress = device.getAddress(); // MAC address
                 Log.i(TAG, deviceName);
@@ -158,12 +160,21 @@ public class runActivity extends AppCompatActivity {
        // AcceptThread serverThread=new AcceptThread();
        // serverThread.start();
         //setResult(Activity.RESULT_OK, new Intent().putExtra("Device", (Bundle) null));
+        switch (view.getId()) {
+            case R.id.ButRecView:
+                Intent intent = new Intent(view.getContext(), MyFragments.class);
+                startActivity(intent);
 
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            BtLe btLe=new BtLe(this);
-            btLe.scanLeDevice();
+                break;
+            case R.id.scanBtLe:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                  BtLe btLe=new BtLe(this);
+                  btLe.scanLeDevice();
+                }
+                break;
         }
+
+
 
 
     }

@@ -13,15 +13,23 @@
         <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/uparrowright.xml" value="0.5435" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/upbuttontheme.xml" value="0.296" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/upleftbutheme.xml" value="0.3035" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/viewpager.xml" value="0.339" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/layout/activity_bt_le.xml" value="0.31354166666666666" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/layout/activity_get_blu_devicec.xml" value="0.34427083333333336" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/activity_my_fragments.xml" value="0.34427083333333336" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/layout/activity_remote_control_car.xml" value="0.33" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/layout/activity_run.xml" value="0.30185185185185187" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/adaptervieepager.xml" value="0.37604166666666666" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/layout/content_remote_control.xml" value="0.34427083333333336" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/layout/fragment_first.xml" value="0.511322463768116" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/layout/fragment_second.xml" value="0.5067934782608695" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/layout/list_item.xml" value="0.67" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/pagefragment1.xml" value="0.34427083333333336" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/pager_activity.xml" value="0.3859375" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/vievpager.xml" value="0.28203125" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/viewpager.xml" value="0.33697916666666666" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/layout/viewpager2.xml" value="0.252734375" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/menu/main_menu.xml" value="0.3411458333333333" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/xml/list_item.xml" value="0.3651041666666667" />
       </map>
