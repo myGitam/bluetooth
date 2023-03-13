@@ -1,5 +1,6 @@
 package com.example.bluetooth;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -9,6 +10,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
@@ -43,10 +45,13 @@ import androidx.core.app.ActivityCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.net.URLEncoder;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
 
     private static final String TAG = "MyApp";
+    private String[] PERMISSIONS;
     PairedDev devToConnect;
     ConnectedClass mySocket;
     TextInputEditText inputEditText;
@@ -58,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button buttonSend;
     String Data;
     ScrollView scroll;
+    String symbolDelimeter="\r\n";
     BluetoothManager bluetoothManager;
     BluetoothAdapter bluetoothAdapter;
     GetBluDevice device;
@@ -67,7 +73,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ProgressBar progressBar;
     ConnectedClass connectedClass;
     MenuItem item;
-
+    SharedPreferences setting;
+    String settingEncoding;
+    Boolean settingsentinconsole;
+    Boolean autoscroll;
+    Boolean rn=true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (Build.VERSION.SDK_INT < 16) {
@@ -78,6 +88,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        PERMISSIONS= new String[]{
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        };
+        if (!hasPermissions(MainActivity.this,PERMISSIONS)) {
+
+            ActivityCompat.requestPermissions(MainActivity.this,PERMISSIONS,1);
+        }
+
         device=new GetBluDevice();
         bluetoothAdapter=device.getBluetoothAdapter();
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -96,10 +118,81 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         filter3.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         filter3.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         registerReceiver(mBroadcastReceiver, filter3);
-
-
+        ////////////////////////////////////
 
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //Получаю настройки:
+        setting=getSharedPreferences("settings", Context.MODE_MULTI_PROCESS);
+        Log.d(TAG, "getSharedPreferences: "+ setting.getString(SettingsFragment.APP_PREFERENCES_encoding,"UTF-8"));
+        settingEncoding=setting.getString(SettingsFragment.APP_PREFERENCES_encoding,"UTF-8");
+        settingsentinconsole=setting.getBoolean(SettingsFragment.APP_PREFERENCES_showsent,true);
+        autoscroll=setting.getBoolean(SettingsFragment.APP_PREFERENCES_autoscroll,true);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //   TextInputEditText inputEditText=findViewById(R.id.inputText);
+        // textView=findViewById(R.id.textView);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+   // Запрос разрешений всех
+    private boolean hasPermissions(Context context, String... PERMISSIONS) {
+
+        if (context != null && PERMISSIONS != null) {
+
+            for (String permission: PERMISSIONS){
+
+                if (ActivityCompat.checkSelfPermission(context,permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+   ///Результат разрешений
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "BLUETOOTH_CONNECT Permission is granted", Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(this, "BLUETOOTH_CONNECT Permission is denied", Toast.LENGTH_SHORT).show();
+            }
+
+            if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "BLUETOOTH_SCAN is granted", Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(this, "BLUETOOTH_SCAN is denied", Toast.LENGTH_SHORT).show();
+            }
+
+            if (grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "ACCESS_FINE is granted", Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(this, "ACCESS_FINE is denied", Toast.LENGTH_SHORT).show();
+            }
+            if (grantResults[3] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "ACCESS_COARSE_LOCATION is granted", Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(this, "ACCESS_COARSE_LOCATION is denied", Toast.LENGTH_SHORT).show();
+            }
+
+
+        }
+    }
+/////////////////////////////////////////////////////
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
@@ -113,11 +206,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onActivityResult(ActivityResult result) {
 
-            Log.d(TAG, "onActivityResult Main: start "+ result.getData());
+
             if (result.getData()!=null) {
                 Log.d(TAG, "onActivityResult Main: no null");
                 Bundle s = result.getData().getExtras();
-                devToConnect=s.getParcelable("Device");
+                devToConnect=s.getParcelable("DeviceClassic");
                 MenuItem item = menu.findItem(R.id.connectBlu);// показать иконку
                 item.setVisible(true); // показать иконку
                 Log.d(TAG, "Result: DATA: " + devToConnect.getDevName()+" "+devToConnect.getPairBluDev());
@@ -148,9 +241,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
           // Intent runIntent=new Intent(this,runActivity.class);
          //  startActivity(runIntent);
             //openRunActivity.launch(runIntent);
+            if (!bluetoothAdapter.isEnabled()) {
+                showToastBlue();
+            }
+            if (bluetoothAdapter.isEnabled()) {
+                Intent intent=new Intent(this,MyFragments.class);
+                openRunActivity.launch(intent);
+            }
 
-             Intent intent=new Intent(this,runActivity.class);
-             openRunActivity.launch(intent);
 
              //Intent intent=new Intent(this,ScreenSlidePagerActivity.class);
             // openRunActivity.launch(intent);
@@ -160,9 +258,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mBroadcastReceiver.getResultCode(); // закоментировать
             if(stateConnect=="android.bluetooth.device.action.ACL_CONNECTED") {
                 inText = String.valueOf(inputEditText.getText()+"\r\n");
+
+
                 mySocket.sendData(inText);
                 inputEditText.setText("");
-                writtenOUT(inText);
+                // отображать отправленное если стоит чек
+                if(settingsentinconsole) {
+                    writtenOUT(inText);
+                }
                 //тут цвет точго что ввел пользователь + пргкрутка вниз
               //  SpannableStringBuilder builder = new SpannableStringBuilder();
               //  SpannableString str1= new SpannableString(inText);
@@ -170,11 +273,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
               //  builder.append(str1);
 
 
-
-
-
                 //getTextView.append("\n");
-                scroll.fullScroll(View.FOCUS_DOWN);//прокрутка автоматическая консольного окна
+                //scroll.fullScroll(View.FOCUS_DOWN);//прокрутка автоматическая консольного окна
               //  mySocket.sendData("\r\n");
                 //mySocket.cancel();
                 break;
@@ -200,7 +300,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(new Intent(this, RemoteControlCar.class));
                 return true;
             case R.id.open_settings:
-
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
                 return true;
             case R.id.save_settings:
 
@@ -238,18 +339,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 // методы для красивого/ ввода вывода
       void writtenIN(String d){
-           d = d.replace("\r", "");
-          d = d.replace("\n", "");
-           SpannableStringBuilder builder = new SpannableStringBuilder();
-           SpannableString str1= new SpannableString("IN->: "+d);
-           str1.setSpan(new ForegroundColorSpan(Color.RED), 0, str1.length(), 0);
-           builder.append(str1);
-           getTextView.append(builder);
-           getTextView.append("\r\n");
-
+           if(rn==true) {
+               d = d.replace("\r", "");
+               d = d.replace("\n", "");
+               SpannableStringBuilder builder = new SpannableStringBuilder();
+               SpannableString str1 = new SpannableString("IN->: " + d);
+               str1.setSpan(new ForegroundColorSpan(Color.RED), 0, str1.length(), 0);
+               builder.append(str1);
+               getTextView.append(builder);
+               // getTextView.append("\r\n");
+               if (autoscroll) {
+                   scroll.fullScroll(View.FOCUS_DOWN);//прокрутка автоматическая консольного окна
+               }
+           }
+           if (rn==false){
+               Log.d(TAG, "readMessage: "+d);
+                    strBuild.append(d); // Строю строку из входящих данных пока не дойдет до разделителя
+                    Log.d(TAG, " strBuild: " +strBuild.length());
+                    int c=strBuild.indexOf(symbolDelimeter);
+                    Log.d(TAG, "indexOf: "+c);
+                    Log.d(TAG, "writtenIN: "+strBuild);
+                    if((c>0)&&(strBuild.length()>0)){
+                        String takenData= strBuild.substring(0, c);
+                        strBuild.delete(0, strBuild.length());
+                        Log.d(TAG, "received: " + takenData+ " Char " + takenData.length());
+                        SpannableStringBuilder builder = new SpannableStringBuilder();
+                        SpannableString str2 = new SpannableString("IN->: ");
+                        str2.setSpan(new ForegroundColorSpan(Color.YELLOW),0,str2.length(),0);
+                        SpannableString str1 = new SpannableString(str2 + takenData);
+                        str1.setSpan(new ForegroundColorSpan(Color.RED), 6, str1.length(), 0);
+                        builder.append(str1);
+                        getTextView.append(builder);
+                        getTextView.append("\r\n");
+                        if (autoscroll) {
+                            scroll.fullScroll(View.FOCUS_DOWN);//прокрутка автоматическая консольного окна
+                        }
+                    }
+                    if((c==0)){
+                        strBuild.delete(0,strBuild.length());
+                        getTextView.append("\r\n");
+                    }
+           }
       }
     // методы для красивого/ ввода вывода
     void writtenOUT(String d){
+
         d = d.replace("\r", "");
         d = d.replace("\n", "");
         SpannableStringBuilder builder = new SpannableStringBuilder();
@@ -258,6 +392,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         builder.append(str1);
         getTextView.append(builder);
         getTextView.append("\r\n");
+        if(autoscroll) {
+            scroll.fullScroll(View.FOCUS_DOWN);//прокрутка автоматическая консольного окна
+        }
     }
 
     //void ok (){mySocket.sendData("Сообщение получено");}
@@ -269,17 +406,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-     //   TextInputEditText inputEditText=findViewById(R.id.inputText);
-       // textView=findViewById(R.id.textView);
-    }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
       //////////********
 //получение адаптера
      public class  GetBluDevice  {
@@ -322,7 +449,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (result.getResultCode() == Activity.RESULT_OK) {
                     Intent intentResult = result.getData();
                     Log.i(TAG, "Включил блютуз");
-                    Log.i(TAG, String.valueOf(result.getResultCode()));
+                    boolean s= ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED;
+                    Log.d(TAG, "BluePermission: "+ s);
                     //finish(); // Close Activity
                 } else {
                     Log.i(TAG, String.valueOf(result.getResultCode()));
@@ -335,6 +463,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
+      // отображение всплывающего
     public void showToastBlue() {
         Toast toast3 = Toast.makeText(getApplicationContext(),
                 "Bluetooth OFF\nYou must turn ON", Toast.LENGTH_LONG);
@@ -346,18 +475,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         toastContainer.addView(catImageView, 0);
         toast3.show();
     }
+    /// ПОказываю прогресс бар
     public void connectBluetoothDev() throws InterruptedException {
         Log.d(TAG, "ProgressBar ");
-
         progressBar.setVisibility(ProgressBar.VISIBLE);
-        connectedClass = ConnectedClass.createInstance(devToConnect.getPairBluDev(), mHandler);
-
-        Log.d(TAG, "SingleTon: " + connectedClass);
-
-
-
-
-
+        //создаю обьект класса через синглтоне createInstance
+        mySocket = ConnectedClass.createInstance(devToConnect.getPairBluDev(), mHandler,settingEncoding);
+        Log.d(TAG, "SingleTon: " + mySocket);
     }
     void cheakCon(){
         if (mySocket.isConnected) {
@@ -386,13 +510,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
     void disconnectedBlue(){
-
         mySocket.cancel();// Close socket if not Connected
         mySocket.delObject(); // del obgectSingleTOn
         buttonSend.setEnabled(false);
         MenuItem item=menu.findItem(R.id.connectBlu);
         item.setIcon(R.drawable.disconnected);
-
         flagBlueConnect=false;
         button.setEnabled(true);
         Toast.makeText(MainActivity.this, "disConnected", Toast.LENGTH_SHORT).show();
@@ -412,12 +534,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     getTextView.setTextColor(Color.parseColor("#0015ff"));
                     writtenIN(Data);
 
-                    scroll.fullScroll(View.FOCUS_DOWN);//прокрутка автоматическая консольного окна
+
                     //if(Integer.valueOf(Data)==4){ok();}
                     break;
                 case 1:
                    // Log.d(TAG, "handleMessage: 1");
-                    mySocket = connectedClass;
+                    //mySocket = connectedClass;
                     cheakCon();
                     break;
             }

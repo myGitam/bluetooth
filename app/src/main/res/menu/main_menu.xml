@@ -9,11 +9,11 @@
     <item
         android:id="@+id/save_settings"
         android:orderInCategory="3"
-        android:title="Сохранить" />
+        android:title="No" />
     <item
         android:id="@+id/open_settings"
         android:orderInCategory="2"
-        android:title="Открыть" />
+        android:title="Settings" />
 
     <item
         android:id="@+id/connectBlu"

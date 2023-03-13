@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="autoscroll"
+        android:title="@string/autoscroll"/>
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="bTleNoName"
+        android:title="@string/bTleNoName" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="showsent"
+        android:title="@string/showsent" />
+    <ListPreference
+        android:key="listPreference"
+
+        android:dialogTitle="Set Encoding"
+        android:summary="@string/encoding"
+        />
+
+</PreferenceScreen>

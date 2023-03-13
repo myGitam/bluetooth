@@ -168,8 +168,8 @@ public class runActivity extends AppCompatActivity {
                 break;
             case R.id.scanBtLe:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                  BtLe btLe=new BtLe(this);
-                  btLe.scanLeDevice();
+                //  BtLe btLe=new BtLe(this);
+                 // btLe.scanLeDevice();
                 }
                 break;
         }

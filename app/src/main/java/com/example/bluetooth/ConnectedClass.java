@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -11,12 +12,15 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 class ConnectedClass extends Thread {
-
+    SharedPreferences setting;
     OutputStream mmOutStream;
     InputStream mmInStream;
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -29,12 +33,13 @@ class ConnectedClass extends Thread {
     BluetoothAdapter bluetoothAdapter;
     Handler h;
     Message msg;
+    String settingEncoding;
 
     private static ConnectedClass instance; // обьект Singleton
     //////SINGLETON////
-    public static synchronized ConnectedClass createInstance(BluetoothDevice device, Handler h) throws InterruptedException {
+    public static synchronized ConnectedClass createInstance(BluetoothDevice device, Handler h, String settingEncoding) throws InterruptedException {
         if (instance == null) {
-            instance = new ConnectedClass(device, h);
+            instance = new ConnectedClass(device, h,settingEncoding);
             instance.start();
 
         }
@@ -49,14 +54,17 @@ class ConnectedClass extends Thread {
 
 
 
-    public ConnectedClass(BluetoothDevice device, Handler h) {
+    public ConnectedClass(BluetoothDevice device, Handler h, String settingEncoding) {
         // Use a temporary object that is later assigned to mmSocket,
         // because mmSocket is final
         msg = h.obtainMessage(1,"");
         this.h = h;
         mmDevice = device;
+        this.settingEncoding=settingEncoding;
         Log.d(TAG, "ConnectedClass зашел " + mmDevice);
         // this.bluetoothAdapter = bluetoothAdapter;
+
+
     }
     @SuppressLint("MissingPermission")
     @Override
@@ -111,11 +119,11 @@ class ConnectedClass extends Thread {
           }
           // Do work to manage the connection (in a separate thread)
           try {
-              Log.d(TAG, "Получая потоки");
+              Log.d(TAG, "Получаю потоки");
 
               mmOutStream = mmSocket.getOutputStream();
               mmInStream = mmSocket.getInputStream();
-              new readThread(mmInStream,h).start();
+              new readThread(mmInStream,h,settingEncoding).start();
              // h.sendMessage(msg);
           } catch (IOException e) {
               Log.d(TAG, "ПОТОК НЕ ПОЛУЧИЛ");
@@ -132,13 +140,16 @@ class ConnectedClass extends Thread {
     // other instance variables can be here
 
     void sendData(String message) {
-        byte[] msgBuffer = message.getBytes();
 
-          Log.d(TAG, "sendData: "+ mmSocket.isConnected());
+        byte[] msgBuffer = new byte[0];
+            msgBuffer = message.getBytes();
+
+
+        Log.d(TAG, "sendData: "+ mmSocket.isConnected());
         try {
             mmOutStream.write(msgBuffer);
 
-            String s=new String(msgBuffer);
+            String s=new String(msgBuffer,"UTF-8");
             Log.d(TAG, "...Посылаем данные: " +  s);
            // Toast.makeText(context, "Sended", Toast.LENGTH_SHORT).show();
 

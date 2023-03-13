@@ -1,6 +1,7 @@
 package com.example.bluetooth;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 //Адаптер для Списка
 public class StateAdapter extends RecyclerView.Adapter<StateAdapter.ViewHolder>{ interface OnStateClickListener{ void onStateClick(PairedDev pairedDev, int position);
     }
+    private static final String TAG = "MyApp";
+
     private LayoutInflater inflater;
     private ArrayList<PairedDev> pairedDevs;
     private OnStateClickListener onClickListener;
@@ -29,10 +32,12 @@ public class StateAdapter extends RecyclerView.Adapter<StateAdapter.ViewHolder>{
         TextView textViewName;
         ImageView myImageViev;
         TextView IdTextViev;
+        TextView macTextViev;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
         textViewName = itemView.findViewById(R.id.nameTextViev);
+        macTextViev=itemView.findViewById(R.id.mactextviev);
         myImageViev=itemView.findViewById(R.id.IdimageView);
         IdTextViev=itemView.findViewById(R.id.IdTextViev);
         }
@@ -51,11 +56,14 @@ public class StateAdapter extends RecyclerView.Adapter<StateAdapter.ViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull StateAdapter.ViewHolder holder, int position) {
-        PairedDev pairedDev;
-        pairedDev = pairedDevs.get(position);
-        holder.textViewName.setText(pairedDev.getDevName());
-        holder.myImageViev.setImageResource(android.R.drawable.stat_sys_data_bluetooth);
-        holder.IdTextViev.setText(Integer.toString(position+1));
+
+        PairedDev pairedDev = pairedDevs.get(position);
+        Log.d(TAG, "onBindViewHolder: "+position +" "+pairedDev.devName);
+            holder.textViewName.setText(pairedDev.getDevName());
+            holder.myImageViev.setImageResource(android.R.drawable.stat_sys_data_bluetooth);
+            holder.IdTextViev.setText(Integer.toString(position + 1));
+            holder.macTextViev.setText(pairedDev.getMac());
+
 // обработка нажатия
         holder.itemView.setOnClickListener(new View.OnClickListener(){
             @Override

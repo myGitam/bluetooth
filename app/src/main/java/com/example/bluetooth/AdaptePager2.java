@@ -14,12 +14,19 @@ public class AdaptePager2 extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
+switch (position){
+    case 0:
+        return new BTClassicFragent();
 
+    case 1:
         return new BtLeFragment();
+
+}
+        return new BTClassicFragent();
     }
 
     @Override
     public int getItemCount() {
-        return 1;
+        return 2;
     }
 }

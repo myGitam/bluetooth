@@ -16,4 +16,10 @@
     <string name="button">Button</string>
     <string name="buttonUp">buttonUp</string>
     <string name="up_left">up left arrow</string>
+    ///////settings
+    <string name="autoscroll">Сonsole autoscroll</string>
+    <string name="echo">Echo</string>
+    <string name="bTleNoName">BTle show without name</string>
+    <string name="encoding">Encoding</string>
+    <string name="showsent">Show sent in console</string>
 </resources>

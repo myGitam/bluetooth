@@ -5,9 +5,19 @@ import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.Nullable;
+
 //Клас для найденных спаренных устройст Класиических,  для удобства чтоб передвать в адаптер когда нажимаю
 public class PairedDev implements Parcelable {
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return super.equals(obj);
+    }
     public PairedDev(BluetoothDevice pairBluDev, String devName) {
         this.pairBluDev = pairBluDev;
         this.devName = devName;
@@ -15,7 +25,10 @@ public class PairedDev implements Parcelable {
 
     BluetoothDevice pairBluDev;
     String devName;
-
+    String mac;
+    public String getMac() {
+        return pairBluDev.getAddress();
+    }
     public String getDevName() {
         return devName;
     }
