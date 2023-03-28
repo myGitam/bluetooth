@@ -27,11 +27,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,7 +50,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.net.URLEncoder;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
 
 
     private static final String TAG = "MyApp";
@@ -55,15 +58,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     PairedDev devToConnect;
     ConnectedClass mySocket;
     TextInputEditText inputEditText;
-    TextView textView;
+    DisplayText displayText;
+    String APP_PREFERENCES_delimeter="delimeterselect";
+    String delimeter;
     TextView getTextView;
     TextView inputTextView;
     String stateConnect; // подключено ли устройство или соеденение потеряно
     Button button;
     Button buttonSend;
+    Button buttonMem1;
+    Button buttonMem2;
+    Button buttonMem3;
+    Button buttonMem4;
+    
     String Data;
     ScrollView scroll;
-    String symbolDelimeter="\r\n";
     BluetoothManager bluetoothManager;
     BluetoothAdapter bluetoothAdapter;
     GetBluDevice device;
@@ -71,13 +80,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     boolean flagBlueConnect=false;
     StringBuilder strBuild=new StringBuilder();
     ProgressBar progressBar;
-    ConnectedClass connectedClass;
-    MenuItem item;
+    SpannableStringBuilder builder;
     SharedPreferences setting;
     String settingEncoding;
     Boolean settingsentinconsole;
     Boolean autoscroll;
-    Boolean rn=true;
+    Boolean linefeed=false;
+    Spinner spinner;
+    String[] delimeterArray = { "CR/NL","CR","NL","Non"};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (Build.VERSION.SDK_INT < 16) {
@@ -88,7 +99,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        //Не выключать экран пога программа открыта
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        ////
         PERMISSIONS= new String[]{
                 Manifest.permission.BLUETOOTH_CONNECT,
                 Manifest.permission.BLUETOOTH_SCAN,
@@ -103,15 +116,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         device=new GetBluDevice();
         bluetoothAdapter=device.getBluetoothAdapter();
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-
         button= findViewById(R.id.buttonFind);
         button.setOnClickListener(this::onClick);
         buttonSend=findViewById(R.id.buttonSend);
         buttonSend.setOnClickListener(this::onClick);
         buttonSend.setEnabled(false);
+        buttonMem1=findViewById(R.id.memory1);
+        buttonMem2=findViewById(R.id.memory2);
+        buttonMem3=findViewById(R.id.memory3);
+        buttonMem4=findViewById(R.id.memory4);
+        buttonMem1.setOnLongClickListener(this);
+        buttonMem2.setOnLongClickListener(this);
+        buttonMem3.setOnLongClickListener(this);
+        buttonMem4.setOnLongClickListener(this);
+        buttonMem1.setOnClickListener(this::onClick);
         inputEditText=findViewById(R.id.inputText);
         scroll=findViewById(R.id.scroll);
         getTextView=findViewById(R.id.getDataText);
+        spinner=findViewById(R.id.spinnerDelimeter);
+        spinner.setOnItemSelectedListener(spinerSelectedlistener);
 
         //регистрирую широковещательный приёмник
         IntentFilter filter3 = new IntentFilter();
@@ -122,16 +145,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+         ////слушать выпадающего списка выбора конца строки
+        AdapterView.OnItemSelectedListener spinerSelectedlistener=new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                SharedPreferences.Editor editor=setting.edit();
+                editor.putInt(APP_PREFERENCES_delimeter,i);
+                delimeter=spinner.getSelectedItem().toString();
+                Log.d(TAG, "onItemSelected: " +delimeter);
+                editor.apply();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        };
     @Override
     protected void onResume() {
         super.onResume();
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, delimeterArray);
+        // Определяем разметку для использования при выборе элемента
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Применяем адаптер к элементу spinner
+        spinner.setAdapter(spinnerAdapter);
+
+        ///////******////////*********
         //Получаю настройки:
         setting=getSharedPreferences("settings", Context.MODE_MULTI_PROCESS);
         Log.d(TAG, "getSharedPreferences: "+ setting.getString(SettingsFragment.APP_PREFERENCES_encoding,"UTF-8"));
         settingEncoding=setting.getString(SettingsFragment.APP_PREFERENCES_encoding,"UTF-8");
         settingsentinconsole=setting.getBoolean(SettingsFragment.APP_PREFERENCES_showsent,true);
         autoscroll=setting.getBoolean(SettingsFragment.APP_PREFERENCES_autoscroll,true);
-
+        spinner.setSelection(setting.getInt(APP_PREFERENCES_delimeter,0)); // читаю что сохраненно спинере разделителя И УСТАНАВЛИВАЮ ЧТОБ БЫЛО ВИДНО
+        delimeter=spinner.getSelectedItem().toString();
+        displayText=new DisplayText(this);
     }
 
     @Override
@@ -139,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onPause();
         //   TextInputEditText inputEditText=findViewById(R.id.inputText);
         // textView=findViewById(R.id.textView);
+
     }
 
     @Override
@@ -263,20 +312,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mySocket.sendData(inText);
                 inputEditText.setText("");
                 // отображать отправленное если стоит чек
-                if(settingsentinconsole) {
                     writtenOUT(inText);
-                }
-                //тут цвет точго что ввел пользователь + пргкрутка вниз
-              //  SpannableStringBuilder builder = new SpannableStringBuilder();
-              //  SpannableString str1= new SpannableString(inText);
-               // str1.setSpan(new ForegroundColorSpan(Color.RED), 0, str1.length(), 0);
-              //  builder.append(str1);
-
-
-                //getTextView.append("\n");
-                //scroll.fullScroll(View.FOCUS_DOWN);//прокрутка автоматическая консольного окна
-              //  mySocket.sendData("\r\n");
-                //mySocket.cancel();
                 break;
             }
             else {
@@ -287,6 +323,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mySocket.delObject(); // del obgectSingleTOn
                 Log.d(TAG, "Close socket");
             }
+        case R.id.memory1:
+            Log.d(TAG, "onClick: memory1");
+            break;
     }
 
     }
@@ -339,63 +378,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 // методы для красивого/ ввода вывода
       void writtenIN(String d){
-           if(rn==true) {
-               d = d.replace("\r", "");
-               d = d.replace("\n", "");
-               SpannableStringBuilder builder = new SpannableStringBuilder();
-               SpannableString str1 = new SpannableString("IN->: " + d);
-               str1.setSpan(new ForegroundColorSpan(Color.RED), 0, str1.length(), 0);
-               builder.append(str1);
-               getTextView.append(builder);
-               // getTextView.append("\r\n");
-               if (autoscroll) {
+
+          getTextView.append(displayText.writeInText(d,delimeter));
+
+          if (autoscroll) {
                    scroll.fullScroll(View.FOCUS_DOWN);//прокрутка автоматическая консольного окна
-               }
-           }
-           if (rn==false){
-               Log.d(TAG, "readMessage: "+d);
-                    strBuild.append(d); // Строю строку из входящих данных пока не дойдет до разделителя
-                    Log.d(TAG, " strBuild: " +strBuild.length());
-                    int c=strBuild.indexOf(symbolDelimeter);
-                    Log.d(TAG, "indexOf: "+c);
-                    Log.d(TAG, "writtenIN: "+strBuild);
-                    if((c>0)&&(strBuild.length()>0)){
-                        String takenData= strBuild.substring(0, c);
-                        strBuild.delete(0, strBuild.length());
-                        Log.d(TAG, "received: " + takenData+ " Char " + takenData.length());
-                        SpannableStringBuilder builder = new SpannableStringBuilder();
-                        SpannableString str2 = new SpannableString("IN->: ");
-                        str2.setSpan(new ForegroundColorSpan(Color.YELLOW),0,str2.length(),0);
-                        SpannableString str1 = new SpannableString(str2 + takenData);
-                        str1.setSpan(new ForegroundColorSpan(Color.RED), 6, str1.length(), 0);
-                        builder.append(str1);
-                        getTextView.append(builder);
-                        getTextView.append("\r\n");
-                        if (autoscroll) {
-                            scroll.fullScroll(View.FOCUS_DOWN);//прокрутка автоматическая консольного окна
-                        }
-                    }
-                    if((c==0)){
-                        strBuild.delete(0,strBuild.length());
-                        getTextView.append("\r\n");
-                    }
-           }
+          }
+
+
       }
     // методы для красивого/ ввода вывода
     void writtenOUT(String d){
 
-        d = d.replace("\r", "");
-        d = d.replace("\n", "");
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        SpannableString str1= new SpannableString("OUT->: "+d);
-        str1.setSpan(new ForegroundColorSpan(Color.GREEN), 0, str1.length(), 0);
-        builder.append(str1);
-        getTextView.append(builder);
-        getTextView.append("\r\n");
-        if(autoscroll) {
+        if(settingsentinconsole) {
+        getTextView.append(displayText.readWriteOutText(d));
+        if (autoscroll) {
             scroll.fullScroll(View.FOCUS_DOWN);//прокрутка автоматическая консольного окна
         }
+//
     }
+      }
 
     //void ok (){mySocket.sendData("Сообщение получено");}
     @NonNull
@@ -405,9 +407,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.toString();
     }
 
+    @Override
+    public boolean onLongClick(View v) {
+         
+          switch (v.getId()){
+              case R.id.memory1:
+                  new ButtonMemory().saveAgrgument("memory1","Hello");
+                  Log.d(TAG, "onLongClick: memory1");
+              break;
+              case R.id.memory2:
+              break;
+              
+              case R.id.memory3:
+              break;
+              
+              case R.id.memory4:
+              break;
+          }
+        return true;
+    }
 
 
-      //////////********
+    //////////********
 //получение адаптера
      public class  GetBluDevice  {
          BluetoothAdapter bluetoothAdapter;

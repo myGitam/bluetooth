@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">bluetooth</string>
+    <string name="app_name">Serial Bluetooth and etc.</string>
     <string name="button1">Button1</string>
     <string name="imag">imag</string>
     <string name="textview">TextView</string>

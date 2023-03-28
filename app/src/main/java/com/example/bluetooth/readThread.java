@@ -34,7 +34,7 @@ public class readThread extends Thread {
         Message msg;
         super.run();
         Log.d(TAG, "Поток вечно ждущий приходящие данные");
-        byte[] buffer = new byte[2048];  // buffer store for the stream
+        byte[] buffer = new byte[64000];  // buffer store for the stream
         int bytes; // bytes returned from read()
         // Keep listening to the InputStream until an exception occurs
         while (true) {
