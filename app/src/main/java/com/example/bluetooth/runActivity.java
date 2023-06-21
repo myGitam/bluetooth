@@ -154,6 +154,11 @@ public class runActivity extends AppCompatActivity {
             finish();
 
         }
+
+        @Override
+        public void onLongClick(PairedDev pairedDev, int position) {
+
+        }
     };
     public void myOnClick(View view){
         //****Раскоментить чтоб вызывать сервер

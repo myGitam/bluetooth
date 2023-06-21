@@ -80,7 +80,11 @@ public class BtLe {
         GpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         hashSetBlubtleFindingDevList.clear();
     }
+@SuppressLint("MissingPermission")
+public void stopScan(){
+        bluetoothLeScanner.stopScan(leScanCallback);
 
+}
 
     public void scanLeDevice() {
 
@@ -103,18 +107,19 @@ public class BtLe {
                     //добавляю в простой список который передам адаптеру
                    // btleFindingDevList.addAll(hashSetBlubtleFindingDevList);
                    // hashSetBlubtleFindingDevList.clear();
-                    for(BluetoothDevice d:hashSetBlubtleFindingDevList){
-                        Log.d(TAG, "hashSet "+ d.getName());
-                        if(d.getName()==null){
-                            btleFindingDevList.add(new PairedDev(d, "No name"));
-                        }
-                        else {
-                            btleFindingDevList.add(new PairedDev(d, d.getName()));
-                        }
-                    }
 
-                    msg=handler.obtainMessage(2,"");
-                    handler.sendMessage(msg);
+                        for (BluetoothDevice d : hashSetBlubtleFindingDevList) {
+                            Log.d(TAG, "hashSet " + d.getName());
+                            if (d.getName() == null) {
+                                btleFindingDevList.add(new PairedDev(d, "No name"));
+                            } else {
+                                btleFindingDevList.add(new PairedDev(d, d.getName()));
+                            }
+                        }
+
+                        msg = handler.obtainMessage(2, "");
+                        handler.sendMessage(msg);
+
                 }
             }, SCAN_PERIOD);
 
@@ -176,10 +181,14 @@ public class BtLe {
             else{
                 //Log.d(TAG, "/////");
               //  Log.d(TAG, "onScanResult: "+result.getDevice().getAddress());
-               PairedDev pairedDev= new PairedDev(result.getDevice(), result.getDevice().getName());
-                Log.d(TAG, "onScanResult: " +pairedDev.getPairBluDev().getAddress());
-               hashSetBlubtleFindingDevList.add(result.getDevice());
-
+                if(result!=null) {
+                    PairedDev pairedDev = new PairedDev(result.getDevice(), result.getDevice().getName());
+                    Log.d(TAG, "onScanResult: " + pairedDev.getPairBluDev().getAddress());
+                    hashSetBlubtleFindingDevList.add(result.getDevice());
+                }
+                else {
+                    Log.d(TAG, "RESUTLNULL: ");
+                }
             }
         }
 

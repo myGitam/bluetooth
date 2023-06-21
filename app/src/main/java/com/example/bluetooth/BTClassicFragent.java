@@ -158,6 +158,13 @@ public class BTClassicFragent extends Fragment {
             getActivity().finish();
 
         }
+
+        @Override
+        public void onLongClick(PairedDev pairedDev, int position) {
+            Log.d(TAG, "onLongClick: ");
+        }
+
+
     };
     public void myOnClick(View view){
         //****Раскоментить чтоб вызывать сервер

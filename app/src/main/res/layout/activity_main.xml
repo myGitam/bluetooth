@@ -93,11 +93,13 @@
 
         <TableLayout
             android:id="@+id/tableLayout"
-            android:layout_width="200dp"
-            android:layout_height="120dp"
+            android:layout_width="256dp"
+            android:layout_height="103dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
             android:layout_marginTop="3dp"
-            android:layout_marginEnd="3dp"
-            android:layout_marginRight="3dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
             android:padding="1dp"
             android:paddingLeft="2dp"
             android:paddingTop="1dp"
@@ -106,6 +108,7 @@
             android:stretchColumns="0, 1"
             app:barrierMargin="2dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/buttonFind"
             app:layout_constraintTop_toTopOf="parent">
 
             <TableRow
@@ -117,14 +120,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:text="Mem1" />
+                    android:text="MEM1" />
 
                 <Button
                     android:id="@+id/memory2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:text="Mem2" />
+                    android:text="MEM2" />
             </TableRow>
 
             <TableRow

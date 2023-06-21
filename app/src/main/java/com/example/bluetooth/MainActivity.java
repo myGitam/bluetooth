@@ -18,9 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -45,10 +43,15 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.net.URLEncoder;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
 
@@ -70,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button buttonMem2;
     Button buttonMem3;
     Button buttonMem4;
-    
+    ArrayList<Button> listButton;
     String Data;
     ScrollView scroll;
     BluetoothManager bluetoothManager;
@@ -86,8 +89,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Boolean settingsentinconsole;
     Boolean autoscroll;
     Boolean linefeed=false;
+    ButtonMemory buttonMemory;
     Spinner spinner;
     String[] delimeterArray = { "CR/NL","CR","NL","Non"};
+    DialogFragment dialogFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +135,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buttonMem3.setOnLongClickListener(this);
         buttonMem4.setOnLongClickListener(this);
         buttonMem1.setOnClickListener(this::onClick);
+        buttonMem2.setOnClickListener(this::onClick);
+        buttonMem3.setOnClickListener(this::onClick);
+        buttonMem4.setOnClickListener(this::onClick);
+
         inputEditText=findViewById(R.id.inputText);
         scroll=findViewById(R.id.scroll);
         getTextView=findViewById(R.id.getDataText);
@@ -163,6 +172,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         };
     @Override
     protected void onResume() {
+
+        Log.d(TAG, "onResume: ");
         super.onResume();
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, delimeterArray);
         // Определяем разметку для использования при выборе элемента
@@ -179,12 +190,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         autoscroll=setting.getBoolean(SettingsFragment.APP_PREFERENCES_autoscroll,true);
         spinner.setSelection(setting.getInt(APP_PREFERENCES_delimeter,0)); // читаю что сохраненно спинере разделителя И УСТАНАВЛИВАЮ ЧТОБ БЫЛО ВИДНО
         delimeter=spinner.getSelectedItem().toString();
+        //Списко из кнопок памяти
+        listButton=new ArrayList<>();
+        listButton.add(buttonMem1);
+        listButton.add(buttonMem2);
+        listButton.add(buttonMem3);
+        listButton.add(buttonMem4);
+        try {
+            setButtonNamefromMem();//Читаю настройки кнопок паямяти
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
         displayText=new DisplayText(this);
+        buttonMemory=new ButtonMemory(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "onPause: ");
         //   TextInputEditText inputEditText=findViewById(R.id.inputText);
         // textView=findViewById(R.id.textView);
 
@@ -193,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy: ");
     }
    // Запрос разрешений всех
     private boolean hasPermissions(Context context, String... PERMISSIONS) {
@@ -242,6 +269,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 /////////////////////////////////////////////////////
+    ///создание меню
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
@@ -305,31 +333,80 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         case R.id.buttonSend:
             mBroadcastReceiver.getResultCode(); // закоментировать
-            if(stateConnect=="android.bluetooth.device.action.ACL_CONNECTED") {
-                inText = String.valueOf(inputEditText.getText()+"\r\n");
 
-
-                mySocket.sendData(inText);
+                inText = String.valueOf(inputEditText.getText());
+                sendData(inText);
                 inputEditText.setText("");
+                //mySocket.sendData(inText);
                 // отображать отправленное если стоит чек
-                    writtenOUT(inText);
+                //    writtenOUT(inText);
                 break;
-            }
-            else {
-                Toast.makeText(this, "Bluetooth divice DISCONNECTED", Toast.LENGTH_SHORT).show();
-                button.setEnabled(true);
-                buttonSend.setEnabled(false);
-                mySocket.cancel();// Close socket if not Connected
-                mySocket.delObject(); // del obgectSingleTOn
-                Log.d(TAG, "Close socket");
-            }
+
+
         case R.id.memory1:
             Log.d(TAG, "onClick: memory1");
+
+            try {
+                String v=buttonMemory.getMemArgument(view.getResources().getResourceEntryName(view.getId()));
+                sendData(buttonMemory.getMemArgument(view.getResources().getResourceEntryName(view.getId())));
+                Log.d(TAG, "onClick: " +v);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            break;
+        case R.id.memory2:
+            Log.d(TAG, "onClick: memory2");
+            try {
+                String v=buttonMemory.getMemArgument(view.getResources().getResourceEntryName(view.getId()));
+                sendData(v);
+                Log.d(TAG, "onClick: " +v);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            break;
+        case R.id.memory3:
+            Log.d(TAG, "onClick: memory3");
+            try {
+                String v=buttonMemory.getMemArgument(view.getResources().getResourceEntryName(view.getId()));
+                sendData(v);
+                Log.d(TAG, "onClick: " +v);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            break;
+        case R.id.memory4:
+            Log.d(TAG, "onClick: memory4");
+            try {
+                String v=buttonMemory.getMemArgument(view.getResources().getResourceEntryName(view.getId()));
+                sendData(v);
+                Log.d(TAG, "onClick: " +v);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             break;
     }
 
     }
     //метод выбора меню
+    private void sendData(String s){
+        String outText;
+        if(stateConnect=="android.bluetooth.device.action.ACL_CONNECTED") {
+            outText = s+"\r\n";
+            mySocket.sendData(outText);
+            // отображать отправленное если стоит чек
+            writtenOUT(outText);
+
+        }
+        else {
+            Toast.makeText(this, "Bluetooth divice DISCONNECTED", Toast.LENGTH_SHORT).show();
+            button.setEnabled(true);
+            buttonSend.setEnabled(false);
+            mySocket.cancel();// Close socket if not Connected
+            mySocket.delObject(); // del obgectSingleTOn
+            Log.d(TAG, "Close socket");
+        }
+    }
+    ////////
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -406,22 +483,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public String toString() {
         return super.toString();
     }
-
+//// Длинтельное нажатие на кнопки памяти для сохранения значений
     @Override
     public boolean onLongClick(View v) {
          
           switch (v.getId()){
               case R.id.memory1:
-                  new ButtonMemory().saveAgrgument("memory1","Hello");
+                  Log.d(TAG, "ID: "+ v.getResources().getResourceEntryName(v.getId())); //получаю ID кнопки
+                  dialogFragment=new ButtonMemory(this,v.getResources().getResourceEntryName(v.getId()),mHandler);
+                  dialogFragment.show(getSupportFragmentManager(),"Save presets");
                   Log.d(TAG, "onLongClick: memory1");
               break;
               case R.id.memory2:
+                  Log.d(TAG, "ID: "+ v.getResources().getResourceEntryName(v.getId())); //получаю ID кнопки
+                  dialogFragment=new ButtonMemory(this,v.getResources().getResourceEntryName(v.getId()),mHandler);
+                  dialogFragment.show(getSupportFragmentManager(),"Save presets");
+                  Log.d(TAG, "onLongClick: memory2");
               break;
               
               case R.id.memory3:
+                  Log.d(TAG, "ID: "+ v.getResources().getResourceEntryName(v.getId())); //получаю ID кнопки
+                  dialogFragment=new ButtonMemory(this,v.getResources().getResourceEntryName(v.getId()),mHandler);
+                  dialogFragment.show(getSupportFragmentManager(),"Save presets");
+                  Log.d(TAG, "onLongClick: memory3");
               break;
               
               case R.id.memory4:
+                  Log.d(TAG, "ID: "+ v.getResources().getResourceEntryName(v.getId())); //получаю ID кнопки
+                  dialogFragment=new ButtonMemory(this,v.getResources().getResourceEntryName(v.getId()),mHandler);
+                  dialogFragment.show(getSupportFragmentManager(),"Save presets");
+                  Log.d(TAG, "onLongClick: memory4");
               break;
           }
         return true;
@@ -486,16 +577,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
       // отображение всплывающего
     public void showToastBlue() {
-        Toast toast3 = Toast.makeText(getApplicationContext(),
-                "Bluetooth OFF\nYou must turn ON", Toast.LENGTH_LONG);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            Toast toast3 = Toast.makeText(this, "Bluetooth OFF\nYou must turn ON", Toast.LENGTH_LONG);
+            toast3.setGravity(Gravity.CENTER, 0, 0);
+            toast3.show();
+        }
+        else {
+        Toast toast3 = Toast.makeText(this, "Bluetooth OFF\nYou must turn ON", Toast.LENGTH_LONG);
         toast3.setGravity(Gravity.CENTER, 0, 0);
-
         LinearLayout toastContainer = (LinearLayout) toast3.getView();
         ImageView catImageView = new ImageView(getApplicationContext());
         catImageView.setImageResource(R.drawable.offblue);
         toastContainer.addView(catImageView, 0);
         toast3.show();
-    }
+    }}
     /// ПОказываю прогресс бар
     public void connectBluetoothDev() throws InterruptedException {
         Log.d(TAG, "ProgressBar ");
@@ -504,6 +599,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mySocket = ConnectedClass.createInstance(devToConnect.getPairBluDev(), mHandler,settingEncoding);
         Log.d(TAG, "SingleTon: " + mySocket);
     }
+    // метод проверки соединения и ативации дизактивации кнопки
     void cheakCon(){
         if (mySocket.isConnected) {
             Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_SHORT).show();
@@ -540,6 +636,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         button.setEnabled(true);
         Toast.makeText(MainActivity.this, "disConnected", Toast.LENGTH_SHORT).show();
     }
+     //// метод для начальной инициализации кнопок памяти при загрузке приложения
+    private void setButtonNamefromMem() throws JSONException {
+        //Читаю настройки кнопок паямяти
+        ButtonMemory b= new ButtonMemory(this);
+        for(Button but: listButton){
+            but.setText(b.getName(but.getResources().getResourceEntryName(but.getId())));
+        }
+
+
+
+    }
     //Handler слушатель сообщений данных
     Handler mHandler = new Handler(Looper.getMainLooper()){
         @Override
@@ -547,6 +654,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             super.handleMessage(msg);
             Log.d(TAG, "handleMessage: "+msg.what);
             switch (msg.what){
+                //5 получение входящих данных из потока
                 case 5:
                     Log.d(TAG, "handleMessageObj: "+msg.obj);
                     Data=String.valueOf(msg.obj);
@@ -558,10 +666,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     //if(Integer.valueOf(Data)==4){ok();}
                     break;
+                    //1 проверка соединения
                 case 1:
                    // Log.d(TAG, "handleMessage: 1");
                     //mySocket = connectedClass;
                     cheakCon();
+                    break;
+                    //2 обновление названий кнопок
+                case 2:
+                    try {
+                        setButtonNamefromMem();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     break;
             }
         }

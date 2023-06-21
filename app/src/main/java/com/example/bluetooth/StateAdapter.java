@@ -13,9 +13,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-//Адаптер для Списка
-public class StateAdapter extends RecyclerView.Adapter<StateAdapter.ViewHolder>{ interface OnStateClickListener{ void onStateClick(PairedDev pairedDev, int position);
-    }
+//Адаптер для Списка устройст найденных
+public class StateAdapter extends RecyclerView.Adapter<StateAdapter.ViewHolder>{
+    interface OnStateClickListener{
+        void onStateClick(PairedDev pairedDev, int position);
+        void onLongClick(PairedDev pairedDev, int position);
+     }
     private static final String TAG = "MyApp";
 
     private LayoutInflater inflater;
@@ -64,13 +67,23 @@ public class StateAdapter extends RecyclerView.Adapter<StateAdapter.ViewHolder>{
             holder.IdTextViev.setText(Integer.toString(position + 1));
             holder.macTextViev.setText(pairedDev.getMac());
 
-// обработка нажатия
+// обработка короткого нажатия
         holder.itemView.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v)
             {
                 // вызываем метод слушателя, передавая ему данные
                 onClickListener.onStateClick(pairedDev, position);
+            }
+        });
+        //обработка долгого нажатия
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                onClickListener.onLongClick(pairedDev, position);
+
+              //  Log.d(TAG, "onLongClick: ");
+                return true;
             }
         });
 
