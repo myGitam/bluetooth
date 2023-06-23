@@ -88,12 +88,7 @@ public void stopScan(){
 
     public void scanLeDevice() {
 
-        if (GpsStatus == true) {
-            Log.d(TAG, "GpsStatus ENABLE");
-        } else {
-            Intent intent1 = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            context.startActivity(intent1);
-        }
+
 
         if (!scanning) {
             // Stops scanning after a predefined scan period.

@@ -5,14 +5,19 @@ import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,6 +56,8 @@ public class BtLeFragment extends Fragment {
     SharedPreferences setting;
     Boolean settingNoname;
     ProgressBar progressBar;
+    boolean GpsStatus = false;
+    LocationManager locationManager;
     MenuHost menuHost; // для показа в шапке кнопки поиска
     private static final String TAG = "MyApp";
 
@@ -67,6 +74,19 @@ public class BtLeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "BLEFRAGMETNT_onResume: ");
+        locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE); // Для включения GPS
+        GpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER); // Для включения GPS
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (GpsStatus == true) {
+                Log.d(TAG, "GpsStatus ENABLE");
+            } else {
+                Intent intent1 = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                getContext().startActivity(intent1);
+            }
+            btLe = new BtLe(getContext(), btHandler);
+
+        }
         //Создаю меню для кнопки поиска
 
         menuHost.addMenuProvider(new MenuProvider() {
@@ -83,9 +103,14 @@ public class BtLeFragment extends Fragment {
             }
 
             @Override
+            ////поиск устройств
             public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
                 Log.d(TAG, "findBtLeSelected: ");
+
                 if (menuItem.getItemId()==R.id.findiconbBt){
+                    //Проверяю включен ли GPS
+
+
                     Log.d(TAG, "Finding BtLe device: ");
                     btleFindingDevList.clear(); // очищаю списки для нового сканиролвания
                     btleFindingDevListnoname.clear();// очищаю списки для нового сканиролвания
@@ -95,17 +120,15 @@ public class BtLeFragment extends Fragment {
                 return true;
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+        ////////////////////
 
         //Получаю настройки:
         setting = getContext().getSharedPreferences("settings", Context.MODE_MULTI_PROCESS);
         Log.d(TAG, "getSharedPreferences: " + setting.getString(SettingsFragment.APP_PREFERENCES_encoding, "UTF-8"));
         settingNoname = setting.getBoolean(SettingsFragment.APP_PREFERENCES_BTLEnoname, false);
-        Log.d(TAG, "BLEFRAGMETNT_onResume: ");
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
 
-            btLe = new BtLe(getContext(), btHandler);
-        }
+
      //   btLe.scanLeDevice();
 
 
@@ -184,7 +207,7 @@ public class BtLeFragment extends Fragment {
     }
     //функция поиска устройст и добавление их в список
 
-// методы для нажатий
+// методы для нажатий коротких и длинных
     final StateAdapter.OnStateClickListener stateClickListener = new StateAdapter.OnStateClickListener() {
         @Override
         public void onStateClick(PairedDev pairedDev, int position) {
@@ -193,14 +216,35 @@ public class BtLeFragment extends Fragment {
 
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void onLongClick(PairedDev pairedDev, int position) {
             Log.d(TAG, "onLongClick: ");
-            @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(this, false,
+            @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false,
                     bluetoothGattCallback, TRANSPORT_LE);
+
         }
     };
 
+     @SuppressLint("NewApi")
+     private final BluetoothGattCallback bluetoothGattCallback=new BluetoothGattCallback() {
+         @SuppressLint("MissingPermission")
+         @Override
+         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+             super.onConnectionStateChange(gatt, status, newState);
+             if (newState == BluetoothGatt.STATE_CONNECTED) {
+                 // Connected to the device, start discovering services
+                 Log.d(TAG, "onConnectionStateChange: " +" STATE_CONNECTED");
+                 gatt.discoverServices();
+             } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
+                 // Disconnected from the device
+                 Log.d(TAG, "onConnectionStateChange: " +" STATE_DISCONNECTED");
+                 gatt.close();
+             }
+         }
+
+
+     };
 
 
 
@@ -209,10 +253,12 @@ public class BtLeFragment extends Fragment {
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause: ");
-        menuHost.invalidateMenu();
+        menuHost.invalidateMenu(); //отключить меню если вышел из фрагмента
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             btLe.stopScan();
+
         }
+
 
 
     }
