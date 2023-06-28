@@ -58,7 +58,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginBottom="16dp"
         android:hint="ButName"
-        android:maxLength="10"
+        android:maxLength="8"
 
         app:layout_constraintBottom_toTopOf="@+id/textInputmem"
         app:layout_constraintEnd_toEndOf="parent"

@@ -98,7 +98,7 @@ public class BtLeFragment extends Fragment {
             @Override
             public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
                 if(!menu.hasVisibleItems()) {
-                    menuInflater.inflate(R.menu.btlemenu, menu);
+                    menuInflater.inflate(R.menu.btlemenu, menu); //  подключаю меню если этот фрагмнет видим
                 }
             }
 
@@ -106,8 +106,8 @@ public class BtLeFragment extends Fragment {
             ////поиск устройств
             public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
                 Log.d(TAG, "findBtLeSelected: ");
-
-                if (menuItem.getItemId()==R.id.findiconbBt){
+              ///проверка на какую кнопку нажал
+                if (menuItem.getItemId()==R.id.findIconBt){
                     //Проверяю включен ли GPS
 
 
@@ -279,13 +279,23 @@ public class BtLeFragment extends Fragment {
                  Log.d(TAG, "services: "+ services.size());
                  for (BluetoothGattService s:services){
                      Log.d(TAG, "serviceUUID: "+s.getUuid());
-                     //получаю список арактеристик в сервисе
+                     //получаю список характеристик в сервисе
                      List<BluetoothGattCharacteristic> characteristics = s.getCharacteristics();
+
                      for (BluetoothGattCharacteristic characteristic : characteristics) {
                          // Получаю UUID характеристики конкретной
                          UUID value = characteristic.getUuid();
-
                          Log.d(TAG, "UUID  value characteristic: "+ value);
+                         int property = characteristic.getProperties(); // переменная чтоб понять характеристика для записи или для чтения
+                         // проверха характеристики для записи или для чтения
+                         if ((property & BluetoothGattCharacteristic.PROPERTY_READ) > 0){
+                             Log.d(TAG, "property: "+ "READ");
+                         }
+                         if ((property & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) {
+                             Log.d(TAG, "property: "+ "WRITE" + "/r/n" + "***////***");
+                         }
+
+
                      }
                  }
              }

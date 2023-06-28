@@ -43,10 +43,12 @@
             android:exported="false" />
         <activity
             android:name=".SettingsFragment"
-            android:exported="false" />
+            android:exported="false"
+            tools:ignore="Instantiatable" />
         <activity
             android:name=".BTClassicFragent"
-            android:exported="false" />
+            android:exported="false"
+            tools:ignore="Instantiatable" />
         <activity
             android:name=".MyFragments"
             android:exported="false" />

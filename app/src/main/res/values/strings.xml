@@ -22,4 +22,6 @@
     <string name="bTleNoName">BTle show without name</string>
     <string name="encoding">Encoding</string>
     <string name="showsent">Show sent in console</string>
+    <string name="findIconBt">findiconbBt</string>
+
 </resources>

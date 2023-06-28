@@ -3,9 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
 <item
-android:id="@+id/findiconbBt"
+android:id="@+id/findIconBt"
 android:icon="@drawable/findbtle"
-android:title="connect"
+android:title="connectBtle"
 app:showAsAction="always" />
 
 
