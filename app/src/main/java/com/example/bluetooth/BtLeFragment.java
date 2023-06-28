@@ -1,13 +1,16 @@
 package com.example.bluetooth;
 
+import static android.bluetooth.BluetoothDevice.BOND_BONDED;
+import static android.bluetooth.BluetoothDevice.BOND_NONE;
 import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
+import static android.bluetooth.BluetoothGatt.GATT_FAILURE;
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,9 +29,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
@@ -38,12 +38,11 @@ import androidx.core.view.MenuHost;
 import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.UUID;
 
 public class BtLeFragment extends Fragment {
     BtLe btLe = null;
@@ -58,6 +57,7 @@ public class BtLeFragment extends Fragment {
     ProgressBar progressBar;
     boolean GpsStatus = false;
     LocationManager locationManager;
+    PairedDev device;
     MenuHost menuHost; // для показа в шапке кнопки поиска
     private static final String TAG = "MyApp";
 
@@ -220,6 +220,7 @@ public class BtLeFragment extends Fragment {
         @Override
         public void onLongClick(PairedDev pairedDev, int position) {
             Log.d(TAG, "onLongClick: ");
+          device=pairedDev;
             @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false,
                     bluetoothGattCallback, TRANSPORT_LE);
 
@@ -232,18 +233,63 @@ public class BtLeFragment extends Fragment {
          @Override
          public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
              super.onConnectionStateChange(gatt, status, newState);
-             if (newState == BluetoothGatt.STATE_CONNECTED) {
-                 // Connected to the device, start discovering services
-                 Log.d(TAG, "onConnectionStateChange: " +" STATE_CONNECTED");
-                 gatt.discoverServices();
-             } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
-                 // Disconnected from the device
-                 Log.d(TAG, "onConnectionStateChange: " +" STATE_DISCONNECTED");
+             if(status == GATT_SUCCESS) {
+                 if (newState == BluetoothGatt.STATE_CONNECTED) {
+                     // Connected to the device, start discovering services
+                     //Получаю статус подключения состояние сопряжения
+                     int bondstate = device.getPairBluDev().getBondState();
+                     if(bondstate == BOND_NONE || bondstate == BOND_BONDED) {
+                         // Подключились к устройству, вызываем discoverServices с задержкой
+                         gatt.discoverServices();
+                         }
+
+
+                 } // если пользователь отключил
+                 else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
+                     // Disconnected from the device
+                     Log.d(TAG, "onConnectionStateChange: " + " STATE_DISCONNECTED");
+                     gatt.close();
+                 } else {
+                     // мы или подключаемся или отключаемся, просто игнорируем эти статусы
+                 }
+             }
+             else {
+                 // Произошла ошибка... разбираемся, что случилось!
+                 Log.d(TAG, "Error connect: ");
                  gatt.close();
              }
+
          }
 
+         @SuppressLint("MissingPermission")
+         @Override
+         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+             super.onServicesDiscovered(gatt, status);
+             if (status == GATT_FAILURE) {
+                 Log.d(TAG, "Service discovery failed\" ");
+                 gatt.close();
+                 return;
+             }
+             Log.d(TAG, "onServicesDiscovered: " + status);
+             if (status == BluetoothGatt.GATT_SUCCESS) {
+                 // Find the service with the given UUID
+                 //получаю список сервисов
+                 final List<BluetoothGattService> services = gatt.getServices();
 
+                 Log.d(TAG, "services: "+ services.size());
+                 for (BluetoothGattService s:services){
+                     Log.d(TAG, "serviceUUID: "+s.getUuid());
+                     //получаю список арактеристик в сервисе
+                     List<BluetoothGattCharacteristic> characteristics = s.getCharacteristics();
+                     for (BluetoothGattCharacteristic characteristic : characteristics) {
+                         // Получаю UUID характеристики конкретной
+                         UUID value = characteristic.getUuid();
+
+                         Log.d(TAG, "UUID  value characteristic: "+ value);
+                     }
+                 }
+             }
+         }
      };
 
 
