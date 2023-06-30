@@ -292,7 +292,7 @@ public class BtLeFragment extends Fragment {
                              Log.d(TAG, "property: "+ "READ");
                          }
                          if ((property & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) {
-                             Log.d(TAG, "property: "+ "WRITE" + "/r/n" + "***////***");
+                             Log.d(TAG, "property: "+ "WRITE \r\n" );
                          }
 
 
