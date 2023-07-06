@@ -278,7 +278,8 @@ public class BtLeFragment extends Fragment {
 
                  Log.d(TAG, "services: "+ services.size());
                  for (BluetoothGattService s:services){
-                     Log.d(TAG, "serviceUUID: "+s.getUuid());
+                     int index = 0;
+                     Log.d(TAG, "serviceUUID: "+index +":"+s.getUuid());
                      //получаю список характеристик в сервисе
                      List<BluetoothGattCharacteristic> characteristics = s.getCharacteristics();
 

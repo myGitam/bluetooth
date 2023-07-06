@@ -23,5 +23,6 @@
     <string name="encoding">Encoding</string>
     <string name="showsent">Show sent in console</string>
     <string name="findIconBt">findiconbBt</string>
+    <string name="finding">connectBtle</string>
 
 </resources>

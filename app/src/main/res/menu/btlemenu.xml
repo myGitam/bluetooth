@@ -2,11 +2,11 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-<item
-android:id="@+id/findIconBt"
-android:icon="@drawable/findbtle"
-android:title="connectBtle"
-app:showAsAction="always" />
+    <item
+        android:id="@+id/findIconBt"
+        android:icon="@drawable/finding"
+        android:title="@string/finding"
+        app:showAsAction="always" />
 
 
     </menu>
