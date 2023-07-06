@@ -3,11 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.393" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/buttontheme.xml" value="0.4085" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/doqnlefttheme.xml" value="0.343" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/downbuttheme.xml" value="0.304" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/downrightarrowtheme.xml" value="0.4705" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/downrightbuttheme.xml" value="0.342" />
+        <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/finding.xml" value="0.392" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/leftbuttheme.xml" value="0.304" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/rightbuttheme.xml" value="0.304" />
         <entry key="..\:/androidAPP-dev/app/src/main/res/drawable/uparrowright.xml" value="0.5435" />
