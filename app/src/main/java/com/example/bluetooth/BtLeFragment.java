@@ -277,27 +277,31 @@ public class BtLeFragment extends Fragment {
                  final List<BluetoothGattService> services = gatt.getServices();
 
                  Log.d(TAG, "services: "+ services.size());
+                 int index = 0;
                  for (BluetoothGattService s:services){
-                     int index = 0;
-                     Log.d(TAG, "serviceUUID: "+index +":"+s.getUuid());
+                     index++;
+                     Log.d(TAG, "serviceUUID: "+index +": "+s.getUuid());
+
                      //получаю список характеристик в сервисе
                      List<BluetoothGattCharacteristic> characteristics = s.getCharacteristics();
 
                      for (BluetoothGattCharacteristic characteristic : characteristics) {
                          // Получаю UUID характеристики конкретной
-                         UUID value = characteristic.getUuid();
+                         UUID value =characteristic.getUuid();
                          Log.d(TAG, "UUID  value characteristic: "+ value);
+
                          int property = characteristic.getProperties(); // переменная чтоб понять характеристика для записи или для чтения
                          // проверха характеристики для записи или для чтения
-                         if ((property & BluetoothGattCharacteristic.PROPERTY_READ) > 0){
-                             Log.d(TAG, "property: "+ "READ");
+                         if ((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0){
+                             Log.d(TAG, "property: "+ "READ"+property );
                          }
-                         if ((property & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) {
-                             Log.d(TAG, "property: "+ "WRITE \r\n" );
+                         if ((property & (BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE | BluetoothGattCharacteristic.PROPERTY_WRITE)) > 0) {
+                             Log.d(TAG, "property: "+ "WRITE"+ property  );
                          }
 
 
                      }
+
                  }
              }
          }
