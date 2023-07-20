@@ -18,7 +18,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-///Клас отображающий всплывающее окно при длительном нажатии на кнопу
+///Клас отображающий всплывающее окно при длительном нажатии на кнопу памяти
 ////И тут идет сохранение того что ввел, и есть функции получения имени кнопки и данных которые сохранены. Сохраняю в формате JSON
 public class ButtonMemory extends DialogFragment implements View.OnClickListener {
 
@@ -117,18 +117,19 @@ public class ButtonMemory extends DialogFragment implements View.OnClickListener
          }
         
     }
+    //// метод полоучения имени кнопки из файла настроек
     public String getName(String id) throws JSONException {
         settings=context.getSharedPreferences(SettingsFragment.APP_PREFERENCES, Context.MODE_MULTI_PROCESS);
         JSONObject jsonObj = new JSONObject(settings.getString(id,"mem1"));
         String name = jsonObj.getString("name");
-        Log.d(TAG, "getName JSON: "+name);
+        Log.d(TAG, "getName JSON: "+name); // получения имени кнопки
         return name;
     }
-
+ //// метод полоучения параметров из файла настроек
     public String getMemArgument(String id) throws JSONException {
-        settings=context.getSharedPreferences(SettingsFragment.APP_PREFERENCES, Context.MODE_MULTI_PROCESS);
-        JSONObject jsonObj = new JSONObject(settings.getString(id,"arg"));
-        String text = jsonObj.getString("text");
+        settings=context.getSharedPreferences(SettingsFragment.APP_PREFERENCES, Context.MODE_MULTI_PROCESS); // доступ к файлу настроеек
+        JSONObject jsonObj = new JSONObject(settings.getString(id,"arg")); //получения в фармате GSON настроек конкретной кнопки
+        String text = jsonObj.getString("text"); // получение текста который хранится для передачи
         Log.d(TAG, "getName JSON: "+text);
         return text;
     }

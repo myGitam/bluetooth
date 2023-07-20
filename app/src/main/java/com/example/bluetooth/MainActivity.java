@@ -197,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         listButton.add(buttonMem3);
         listButton.add(buttonMem4);
         try {
+            //вызываю метод для чтения настроек кнопок
             setButtonNamefromMem();//Читаю настройки кнопок паямяти
         } catch (JSONException e) {
             e.printStackTrace();
@@ -378,7 +379,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "onClick: memory4");
             try {
                 String v=buttonMemory.getMemArgument(view.getResources().getResourceEntryName(view.getId()));
-                sendData(v);
+                sendData(v); //  отправляю текст
                 Log.d(TAG, "onClick: " +v);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -389,6 +390,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     //метод выбора меню
     private void sendData(String s){
+        cheakCon(); // проверка есть ли подключение
         String outText;
         if(stateConnect=="android.bluetooth.device.action.ACL_CONNECTED") {
             outText = s+"\r\n";
@@ -641,6 +643,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Читаю настройки кнопок паямяти
         ButtonMemory b= new ButtonMemory(this);
         for(Button but: listButton){
+            //вызываю метод класса ButtonMemory для чтения имени по ID кнопки. У меня жесткоо память завязана на имена кнопок// для получения названия кнопки
             but.setText(b.getName(but.getResources().getResourceEntryName(but.getId())));
         }
 

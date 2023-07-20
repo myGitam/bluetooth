@@ -60,7 +60,7 @@ public class BtLeFragment extends Fragment {
     PairedDev device;
     MenuHost menuHost; // для показа в шапке кнопки поиска
     private static final String TAG = "MyApp";
-
+    List<BluetoothGattService> supportedServices; // переменная для хранения сервисов которые поддерживаеют только чтение и запись
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
 
@@ -220,9 +220,9 @@ public class BtLeFragment extends Fragment {
         @Override
         public void onLongClick(PairedDev pairedDev, int position) {
             Log.d(TAG, "onLongClick: ");
-          device=pairedDev;
-            @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false,
-                    bluetoothGattCallback, TRANSPORT_LE);
+            device=pairedDev;
+            @SuppressLint("MissingPermission")
+            BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false, bluetoothGattCallback, TRANSPORT_LE);
 
         }
     };
@@ -263,41 +263,48 @@ public class BtLeFragment extends Fragment {
 
          @SuppressLint("MissingPermission")
          @Override
+         //Метод для обнаружения сервисов
          public void onServicesDiscovered(BluetoothGatt gatt, int status) {
              super.onServicesDiscovered(gatt, status);
              if (status == GATT_FAILURE) {
-                 Log.d(TAG, "Service discovery failed\" ");
+                 Log.d(TAG, "Service discovery failed\" "); /// Сервисы не найдены
                  gatt.close();
                  return;
              }
-             Log.d(TAG, "onServicesDiscovered: " + status);
+             Log.d(TAG, "Discovered: "); //сервисы найдены
+             //ниже проверяю все сервисы на наличие характеристик с возможностью чтени NOTIFY и записи WRITE и добавляю их в отдельный списко с которым буду работать уже из всплывающего менюп о длителдьному нажатию
              if (status == BluetoothGatt.GATT_SUCCESS) {
                  // Find the service with the given UUID
                  //получаю список сервисов
-                 final List<BluetoothGattService> services = gatt.getServices();
+                 final List<BluetoothGattService> services = gatt.getServices(); /// получаю список найденныс сервисов
 
                  Log.d(TAG, "services: "+ services.size());
-                 int index = 0;
+                 int index = 0; ///просто задаю индексацию для себя чтоб понимать какой сервис в лог выводит
+                 //перебираю все сервисы цыклом и сразу в цикле проверяю характеристики на наличие возможности чтения/записи
                  for (BluetoothGattService s:services){
                      index++;
                      Log.d(TAG, "serviceUUID: "+index +": "+s.getUuid());
 
                      //получаю список характеристик в сервисе
                      List<BluetoothGattCharacteristic> characteristics = s.getCharacteristics();
-
+                     // в этом цикле проверяю есть ли у сервиса нужные мне хзарактеристики если есть то я этот сервис запишу в отдельный список только сервисов которые поддерживают то что мне нужно
                      for (BluetoothGattCharacteristic characteristic : characteristics) {
                          // Получаю UUID характеристики конкретной
                          UUID value =characteristic.getUuid();
                          Log.d(TAG, "UUID  value characteristic: "+ value);
 
                          int property = characteristic.getProperties(); // переменная чтоб понять характеристика для записи или для чтения
+                         if( ((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY)>0) && ((property & BluetoothGattCharacteristic.PROPERTY_WRITE|BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)>0)){
+                             Log.d(TAG, "property READ/WRITE "+ ""+property );
+                             supportedServices.add(s); /// добавляю в список сервисы которые поддерживают только чтение и запись
+                         }
                          // проверха характеристики для записи или для чтения
-                         if ((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0){
-                             Log.d(TAG, "property: "+ "READ"+property );
-                         }
-                         if ((property & (BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE | BluetoothGattCharacteristic.PROPERTY_WRITE)) > 0) {
-                             Log.d(TAG, "property: "+ "WRITE"+ property  );
-                         }
+//                         if ((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+//                             Log.d(TAG, "property READ "+ ""+property );
+//                         }
+//                         if ((property & (BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE | BluetoothGattCharacteristic.PROPERTY_WRITE)) > 0) {
+//                             Log.d(TAG, "property: "+ "WRITE"+ property  );
+//                         }
 
 
                      }
