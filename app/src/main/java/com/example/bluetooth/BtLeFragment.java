@@ -220,9 +220,9 @@ public class BtLeFragment extends Fragment {
         @Override
         public void onLongClick(PairedDev pairedDev, int position) {
             Log.d(TAG, "onLongClick: ");
-            device=pairedDev;
-            @SuppressLint("MissingPermission")
-            BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false, bluetoothGattCallback, TRANSPORT_LE);
+          device=pairedDev;
+            @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false,
+                    bluetoothGattCallback, TRANSPORT_LE);
 
         }
     };
@@ -295,8 +295,9 @@ public class BtLeFragment extends Fragment {
 
                          int property = characteristic.getProperties(); // переменная чтоб понять характеристика для записи или для чтения
                          if( ((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY)>0) && ((property & BluetoothGattCharacteristic.PROPERTY_WRITE|BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)>0)){
-                             Log.d(TAG, "property READ/WRITE "+ ""+property );
-                             supportedServices.add(s); /// добавляю в список сервисы которые поддерживают только чтение и запись
+                             Log.d(TAG, "property READ/WRITE "+ "" );
+                            // supportedServices.add(s);
+
                          }
                          // проверха характеристики для записи или для чтения
 //                         if ((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
