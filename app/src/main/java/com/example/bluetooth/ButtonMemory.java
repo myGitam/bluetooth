@@ -91,7 +91,7 @@ public class ButtonMemory extends DialogFragment implements View.OnClickListener
 //                         db.getDAO().insertItem(item);
 //                     }
 //                 }).start();
-
+                //открываю настройки файл и записываю туда то что ввёл
                  SharedPreferences.Editor editor=settings.edit();
                  JSONObject jsonObj = new JSONObject();
                  try {

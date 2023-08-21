@@ -36,6 +36,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.view.MenuHost;
 import androidx.core.view.MenuProvider;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.RecyclerView;
@@ -58,6 +59,7 @@ public class BtLeFragment extends Fragment {
     boolean GpsStatus = false;
     LocationManager locationManager;
     PairedDev device;
+    List<BluetoothGattCharacteristic> characteristicsReadWrite;
     MenuHost menuHost; // для показа в шапке кнопки поиска
     private static final String TAG = "MyApp";
     List<BluetoothGattService> supportedServices; // переменная для хранения сервисов которые поддерживаеют только чтение и запись
@@ -74,6 +76,7 @@ public class BtLeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        supportedServices = new ArrayList<>(); ///ДЛя списка сервисов которые поддерживают чтение запись
         Log.d(TAG, "BLEFRAGMETNT_onResume: ");
         locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE); // Для включения GPS
         GpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER); // Для включения GPS
@@ -87,8 +90,8 @@ public class BtLeFragment extends Fragment {
             btLe = new BtLe(getContext(), btHandler);
 
         }
-        //Создаю меню для кнопки поиска
 
+        //Создаю меню для кнопки поиска
         menuHost.addMenuProvider(new MenuProvider() {
             @Override
             public void onPrepareMenu(@NonNull Menu menu) {
@@ -210,19 +213,25 @@ public class BtLeFragment extends Fragment {
 // методы для нажатий коротких и длинных
     final StateAdapter.OnStateClickListener stateClickListener = new StateAdapter.OnStateClickListener() {
         @Override
+        //короткое нажатие
         public void onStateClick(PairedDev pairedDev, int position) {
 
             Log.d(TAG, "onStateClick: ");
 
         }
-
+///Длинное нажати
         @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void onLongClick(PairedDev pairedDev, int position) {
             Log.d(TAG, "onLongClick: ");
           device=pairedDev;
+          //соединяет и получает список сервисов
             @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false,
                     bluetoothGattCallback, TRANSPORT_LE);
+            //Отображаю меню для выбора сервиса с которым нужно работать это для теста тут наеписано/ нужно переносить в правильное место
+            DialogFragment dialogFragment=new BleSelectServiceDialog(getContext());
+            dialogFragment.show(getParentFragmentManager(),"Select Services");
+
 
         }
     };
@@ -287,6 +296,7 @@ public class BtLeFragment extends Fragment {
 
                      //получаю список характеристик в сервисе
                      List<BluetoothGattCharacteristic> characteristics = s.getCharacteristics();
+
                      // в этом цикле проверяю есть ли у сервиса нужные мне хзарактеристики если есть то я этот сервис запишу в отдельный список только сервисов которые поддерживают то что мне нужно
                      for (BluetoothGattCharacteristic characteristic : characteristics) {
                          // Получаю UUID характеристики конкретной
@@ -294,9 +304,10 @@ public class BtLeFragment extends Fragment {
                          Log.d(TAG, "UUID  value characteristic: "+ value);
 
                          int property = characteristic.getProperties(); // переменная чтоб понять характеристика для записи или для чтения
-                         if( ((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY)>0) && ((property & BluetoothGattCharacteristic.PROPERTY_WRITE|BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)>0)){
-                             Log.d(TAG, "property READ/WRITE "+ "" );
-                            // supportedServices.add(s);
+                         if(((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY)>0) && ((property & BluetoothGattCharacteristic.PROPERTY_WRITE|BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)>0)){
+                            // characteristicsReadWrite.add(characteristic);
+                             Log.d(TAG, "property READ/WRITE add to supportedServices: " );
+                           supportedServices.add(s);
 
                          }
                          // проверха характеристики для записи или для чтения
@@ -311,7 +322,12 @@ public class BtLeFragment extends Fragment {
                      }
 
                  }
+                 //вывожу списко устройств чтение запись
+                Log.d(TAG, "property READ/WRITE ALL:- "+ " "+ supportedServices.get(1).getUuid());
+
+
              }
+
          }
      };
 
