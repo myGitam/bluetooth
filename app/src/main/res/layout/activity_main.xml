@@ -12,6 +12,7 @@
         android:layout_height="fill_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent">
 
         <ScrollView
@@ -72,31 +73,34 @@
             android:id="@+id/buttonSend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
             android:layout_marginEnd="3dp"
             android:layout_marginRight="3dp"
             android:text="Отправить"
             app:layout_constraintBottom_toTopOf="@+id/scroll"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/inputText" />
+            app:layout_constraintStart_toEndOf="@+id/inputText"
+            app:layout_constraintTop_toBottomOf="@+id/spinnerDelimeter" />
 
         <Button
             android:id="@+id/buttonFind"
-            android:layout_width="140dp"
-            android:layout_height="61dp"
+            android:layout_width="120dp"
+            android:layout_height="56dp"
 
-            android:layout_marginStart="3dp"
-            android:layout_marginLeft="3dp"
-            android:layout_marginTop="3dp"
-            android:text="@string/findPaired"
+            android:layout_marginStart="1dp"
+            android:layout_marginLeft="1dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="1dp"
+            android:layout_marginRight="1dp"
+            android:text="Find device"
+            app:layout_constraintEnd_toStartOf="@+id/tableLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TableLayout
             android:id="@+id/tableLayout"
-            android:layout_width="256dp"
-            android:layout_height="103dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginLeft="10dp"
+            android:layout_width="230dp"
+            android:layout_height="102dp"
             android:layout_marginTop="3dp"
             android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
@@ -108,7 +112,6 @@
             android:stretchColumns="0, 1"
             app:barrierMargin="2dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/buttonFind"
             app:layout_constraintTop_toTopOf="parent">
 
             <TableRow
@@ -155,22 +158,30 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="213dp"
+            android:layout_marginLeft="213dp"
             android:layout_marginEnd="1dp"
+
             android:layout_marginRight="1dp"
             android:text="Line-feed:"
-
             app:layout_constraintBottom_toBottomOf="@+id/spinnerDelimeter"
             app:layout_constraintEnd_toStartOf="@+id/spinnerDelimeter"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/spinnerDelimeter" />
 
         <Spinner
             android:id="@+id/spinnerDelimeter"
             android:layout_width="131dp"
             android:layout_height="36dp"
+            android:layout_marginStart="1dp"
+            android:layout_marginLeft="1dp"
+            android:layout_marginTop="1dp"
             android:layout_marginEnd="4dp"
             android:layout_marginRight="4dp"
             app:layout_constraintBottom_toTopOf="@+id/inputText"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView"
+            app:layout_constraintTop_toBottomOf="@+id/tableLayout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
