@@ -7,14 +7,13 @@ import static android.bluetooth.BluetoothGatt.GATT_FAILURE;
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,12 +21,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
-
-import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +33,8 @@ import java.util.UUID;
 
 ///Класс для отображения диалогового окна для выбора сервисов для записи и чтения
 public class BleSelectServiceDialog extends DialogFragment implements View.OnClickListener {
-    List<BluetoothGattService> supportedServices; // переменная для хранения сервисов которые поддерживаеют только чтение и запись
+    ArrayList<BluetoothGattService> supportedServices; // переменная для хранения сервисов которые поддерживаеют только чтение и запись
+
     private static final String TAG = "MyApp";
     Context context;
     Spinner spinner;
@@ -44,6 +43,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     //конструктор
     BleSelectServiceDialog (Context context, PairedDev pairedDev){this.context=context; this.pairedDev=pairedDev;
     }
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public  View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                               Bundle savedInstanceState) {
         getDialog().setTitle("Title!");
@@ -56,16 +56,20 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
                     bluetoothGattCallback, TRANSPORT_LE);
         }
         spinner=v.findViewById(R.id.spinnerSelectservice);
+        supportedServices=new ArrayList<BluetoothGattService>();
+
         return v;
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.buttonOK:
-
-
+                Log.d(TAG, "property READ/WRITE ALL:- "+ " "+ supportedServices.get(0).getUuid());
+                SpinnerAdapter spinAdpt=new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item,supportedServices);
+                spinner.setAdapter(spinAdpt);
                 //соединяет и получает список сервисов
                 Log.d(TAG, "ok: ");
                 break;
