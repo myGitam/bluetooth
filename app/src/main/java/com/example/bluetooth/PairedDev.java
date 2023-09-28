@@ -26,6 +26,7 @@ public class PairedDev implements Parcelable {
     BluetoothDevice pairBluDev;
     String devName;
     String mac;
+
     public String getMac() {
         return pairBluDev.getAddress();
     }

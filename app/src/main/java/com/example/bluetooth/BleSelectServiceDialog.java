@@ -6,7 +6,10 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 import static android.bluetooth.BluetoothGatt.GATT_FAILURE;
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
 
+import static androidx.viewpager.widget.PagerAdapter.POSITION_NONE;
+
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -15,15 +18,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 
@@ -38,11 +46,16 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     private static final String TAG = "MyApp";
     Context context;
     Spinner spinner;
-
+    ArrayAdapter spinAdpt;
     PairedDev pairedDev;
+    
+
     //конструктор
-    BleSelectServiceDialog (Context context, PairedDev pairedDev){this.context=context; this.pairedDev=pairedDev;
+    BleSelectServiceDialog (Context context, PairedDev pairedDev){this.context=context;
+        this.pairedDev=pairedDev;
+        Log.d(TAG, "BleSelectServiceDialog: ");
     }
+    @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public  View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                               Bundle savedInstanceState) {
@@ -51,15 +64,15 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         v.findViewById(R.id.spinnerSelectservice);
         v.findViewById(R.id.buttonOK).setOnClickListener(this::onClick);
         v.findViewById(R.id.buttonCanc).setOnClickListener(this::onClick);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false,
-                    bluetoothGattCallback, TRANSPORT_LE);
-        }
-        spinner=v.findViewById(R.id.spinnerSelectservice);
-        supportedServices=new ArrayList<BluetoothGattService>();
+        v.findViewById(R.id.spinnerSelectservice);
 
+        supportedServices=new ArrayList<BluetoothGattService>();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false, bluetoothGattCallback, TRANSPORT_LE);
+        }
         return v;
     }
+
 
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -68,7 +81,6 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         switch (v.getId()) {
             case R.id.buttonOK:
                 Log.d(TAG, "property READ/WRITE ALL:- "+ " "+ supportedServices.get(0).getUuid());
-                SpinnerAdapter spinAdpt=new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item,supportedServices);
                 spinner.setAdapter(spinAdpt);
                 //соединяет и получает список сервисов
                 Log.d(TAG, "ok: ");
@@ -80,6 +92,23 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         }
 
     }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG, "onViewCreated: ");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: ");
+        spinner=getView().findViewById(R.id.spinnerSelectservice);
+        spinAdpt=new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item,supportedServices);
+        spinner.setAdapter(spinAdpt);
+        spinner.setSelection(0);
+    }
+
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
         Log.d(TAG, "onDismiss: ");
@@ -88,8 +117,13 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         super.onCancel(dialog);
         Log.d(TAG, "onCancel: ");
     }
+
+
+
+
     @SuppressLint("NewApi")
     private final BluetoothGattCallback bluetoothGattCallback=new BluetoothGattCallback() {
+
         @SuppressLint("MissingPermission")
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -118,6 +152,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
                 // Произошла ошибка... разбираемся, что случилось!
                 Log.d(TAG, "Error connect: ");
                 gatt.close();
+                getDialog().cancel();
             }
 
         }
@@ -175,12 +210,40 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
 
                 }
                 //вывожу списко устройств чтение запись
-                Log.d(TAG, "property READ/WRITE ALL:- "+ " "+ supportedServices.get(1).getUuid());
+                Log.d(TAG, "property READ/WRITE ALL:- "+ " "+ supportedServices.get(0).getUuid());
 
+            }
+            updateSpinnerData(supportedServices);
+        }
+
+    };
+
+               public void updateSpinnerData(ArrayList<BluetoothGattService>  supportedServices) {
+                   udpadeSpinHandler.post(new Runnable() {
+                       @Override
+                       public void run() {
+                           if (!supportedServices.isEmpty()){udpadeSpinHandler.sendEmptyMessage(1);
+                           }
+                       }
+                   });
+                   Log.d(TAG, "updateSpinnerData: ");
+                   Log.d(TAG, "updateSpinnerData: " + getLifecycle().toString());
+               // spinAdpt.clear();
 
             }
 
+    Handler udpadeSpinHandler=new Handler(Looper.getMainLooper()){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if(msg.what==1){
+                Log.d(TAG, "handleMessage: 1");
+                spinAdpt.notifyDataSetChanged();
+                spinner.setAdapter(spinAdpt);
+                spinner.setSelection(0, true);
+            }
         }
     };
+
 
 }
