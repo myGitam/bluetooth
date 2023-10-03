@@ -48,7 +48,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     Spinner spinner;
     ArrayAdapter spinAdpt;
     PairedDev pairedDev;
-    
+    spinnerCustomAdapter spinnerCustomAdapter;
 
     //конструктор
     BleSelectServiceDialog (Context context, PairedDev pairedDev){this.context=context;
@@ -65,7 +65,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         v.findViewById(R.id.buttonOK).setOnClickListener(this::onClick);
         v.findViewById(R.id.buttonCanc).setOnClickListener(this::onClick);
         v.findViewById(R.id.spinnerSelectservice);
-
+        spinnerCustomAdapter=new spinnerCustomAdapter(this.getContext(),supportedServices);
         supportedServices=new ArrayList<BluetoothGattService>();
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false, bluetoothGattCallback, TRANSPORT_LE);
@@ -81,7 +81,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         switch (v.getId()) {
             case R.id.buttonOK:
                 Log.d(TAG, "property READ/WRITE ALL:- "+ " "+ supportedServices.get(0).getUuid());
-                spinner.setAdapter(spinAdpt);
+
                 //соединяет и получает список сервисов
                 Log.d(TAG, "ok: ");
                 break;
@@ -103,9 +103,10 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume: ");
+        spinnerCustomAdapter.notifyDataSetChanged();
         spinner=getView().findViewById(R.id.spinnerSelectservice);
         spinAdpt=new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item,supportedServices);
-        spinner.setAdapter(spinAdpt);
+        spinner.setAdapter(spinnerCustomAdapter);
         spinner.setSelection(0);
     }
 
@@ -217,9 +218,10 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         }
 
     };
-
+             ///метод для обновления спинера, запусккаю в нем поток и в случае изменгения шлю уведомление в слушатель хандлера
                public void updateSpinnerData(ArrayList<BluetoothGattService>  supportedServices) {
                    udpadeSpinHandler.post(new Runnable() {
+                       private static final String TAG = "spinerHandler start";
                        @Override
                        public void run() {
                            if (!supportedServices.isEmpty()){udpadeSpinHandler.sendEmptyMessage(1);
@@ -238,8 +240,10 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
             super.handleMessage(msg);
             if(msg.what==1){
                 Log.d(TAG, "handleMessage: 1");
+                spinAdpt=new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item,supportedServices);
                 spinAdpt.notifyDataSetChanged();
-                spinner.setAdapter(spinAdpt);
+                spinnerCustomAdapter.notifyDataSetChanged();
+                spinner.setAdapter(spinnerCustomAdapter);
                 spinner.setSelection(0, true);
             }
         }
