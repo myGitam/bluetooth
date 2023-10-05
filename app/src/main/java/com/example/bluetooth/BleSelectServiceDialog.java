@@ -65,8 +65,8 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         v.findViewById(R.id.buttonOK).setOnClickListener(this::onClick);
         v.findViewById(R.id.buttonCanc).setOnClickListener(this::onClick);
         v.findViewById(R.id.spinnerSelectservice);
-        spinnerCustomAdapter=new spinnerCustomAdapter(this.getContext(),supportedServices);
         supportedServices=new ArrayList<BluetoothGattService>();
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false, bluetoothGattCallback, TRANSPORT_LE);
         }
@@ -103,6 +103,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume: ");
+        spinnerCustomAdapter=new spinnerCustomAdapter(this.getContext(),supportedServices);
         spinnerCustomAdapter.notifyDataSetChanged();
         spinner=getView().findViewById(R.id.spinnerSelectservice);
         spinAdpt=new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item,supportedServices);
@@ -240,9 +241,9 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
             super.handleMessage(msg);
             if(msg.what==1){
                 Log.d(TAG, "handleMessage: 1");
+                spinnerCustomAdapter.notifyDataSetChanged();
                 spinAdpt=new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item,supportedServices);
                 spinAdpt.notifyDataSetChanged();
-                spinnerCustomAdapter.notifyDataSetChanged();
                 spinner.setAdapter(spinnerCustomAdapter);
                 spinner.setSelection(0, true);
             }

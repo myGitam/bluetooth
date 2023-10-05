@@ -18,19 +18,20 @@ import java.util.ArrayList;
 public class spinnerCustomAdapter extends BaseAdapter {
     private static final String TAG = "MyApp";
     Context context;
-    ArrayList<BluetoothGattService> supportedServices;
+    ArrayList<BluetoothGattService>  supportedServices ;
 
     LayoutInflater inflter;
     public spinnerCustomAdapter(Context appContex, ArrayList<BluetoothGattService> supportedServices ) {
-
+        this.supportedServices = new ArrayList<>();
         this.supportedServices=supportedServices;
         this.context=appContex;
+        inflter = (LayoutInflater.from(this.context));
     }
 
     @Override
     public int getCount() {
 
-        return 0;
+        return supportedServices.size();
     }
 
     @Override
@@ -46,8 +47,10 @@ public class spinnerCustomAdapter extends BaseAdapter {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public View getView(int position, View view, ViewGroup parent) {
+
         Log.d(TAG, "Custonspinner: ");
-        view=inflter.inflate(R.layout.spinnerbleadapter,null);
+        //view=inflter.inflate(R.layout.spinnerbleadapter,parent,false);
+        view  = inflter.inflate(R.layout.spinnerbleadapter,parent,false);
         ImageView icon=view.findViewById(R.id.imageButton);
         TextView servicename=view.findViewById(R.id.spintextname);
         servicename.setText(supportedServices.get(position).getUuid().toString());
