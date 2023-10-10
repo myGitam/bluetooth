@@ -14,6 +14,8 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class spinnerCustomAdapter extends BaseAdapter {
     private static final String TAG = "MyApp";
@@ -23,6 +25,7 @@ public class spinnerCustomAdapter extends BaseAdapter {
     LayoutInflater inflter;
     public spinnerCustomAdapter(Context appContex, ArrayList<BluetoothGattService> supportedServices ) {
         this.supportedServices = new ArrayList<>();
+
         this.supportedServices=supportedServices;
         this.context=appContex;
         inflter = (LayoutInflater.from(this.context));
@@ -36,12 +39,12 @@ public class spinnerCustomAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        return null;
+        return supportedServices.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -52,8 +55,10 @@ public class spinnerCustomAdapter extends BaseAdapter {
         //view=inflter.inflate(R.layout.spinnerbleadapter,parent,false);
         view  = inflter.inflate(R.layout.spinnerbleadapter,parent,false);
         ImageView icon=view.findViewById(R.id.imageButton);
+        icon.setImageResource(R.drawable.downrightarrowpng);
         TextView servicename=view.findViewById(R.id.spintextname);
         servicename.setText(supportedServices.get(position).getUuid().toString());
         return view;
     }
+
 }
