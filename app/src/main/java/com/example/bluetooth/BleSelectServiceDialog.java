@@ -56,10 +56,17 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     PairedDev pairedDev;
     spinnerCustomAdapter spinnerCustomAdapter;
     Set<BluetoothGattService> set;
+
     //конструктор
     BleSelectServiceDialog (Context context, PairedDev pairedDev){this.context=context;
         this.pairedDev=pairedDev;
+
         Log.d(TAG, "BleSelectServiceDialog: ");
+    }
+    /// Данные из диалога тут
+    public interface selectedServiceCallback {
+        void onDataReceived(String data);
+
     }
     @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)

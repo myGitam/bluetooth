@@ -61,6 +61,7 @@ public class BtLeFragment extends Fragment {
     PairedDev device;
     List<BluetoothGattCharacteristic> characteristicsReadWrite;
     MenuHost menuHost; // для показа в шапке кнопки поиска
+
     private static final String TAG = "MyApp";
     List<BluetoothGattService> supportedServices; // переменная для хранения сервисов которые поддерживаеют только чтение и запись
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -71,6 +72,7 @@ public class BtLeFragment extends Fragment {
         menuHost=getActivity();
 
     }
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -356,6 +358,8 @@ public class BtLeFragment extends Fragment {
             btLe.stopScan();
         }
     }
+
+
 //создание меню - для кнопки поиска
 
 }
