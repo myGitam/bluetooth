@@ -24,7 +24,6 @@ public class MyFragments extends AppCompatActivity {
         //// Создание шапки с названиями фрагментов
         TabLayout tabLayout = findViewById(R.id.tab_layout);
 
-
         TabLayoutMediator tabLayoutMediator= new TabLayoutMediator(tabLayout, pager2, new TabLayoutMediator.TabConfigurationStrategy() {
             @Override
             public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {

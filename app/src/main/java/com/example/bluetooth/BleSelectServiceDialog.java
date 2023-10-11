@@ -54,13 +54,27 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     Spinner spinner;
     ArrayAdapter spinAdpt;
     PairedDev pairedDev;
+
     spinnerCustomAdapter spinnerCustomAdapter;
     Set<BluetoothGattService> set;
+
     //конструктор
-    BleSelectServiceDialog (Context context, PairedDev pairedDev){this.context=context;
+    BleSelectServiceDialog (Context context, PairedDev pairedDev){
+        this.context=context;
         this.pairedDev=pairedDev;
+
         Log.d(TAG, "BleSelectServiceDialog: ");
     }
+    /// Данные из диалога тут
+
+
+    private void sendDataToFragment(String data) {
+        Bundle result = new Bundle();
+        result.putString("key", data);
+        getParentFragmentManager().setFragmentResult("requestKey", result);
+      //  dismiss();
+    }
+
     @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public  View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -82,7 +96,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         switch (v.getId()) {
             case R.id.buttonOK:
                 Log.d(TAG, "property READ/WRITE ALL:- "+ " "+ supportedServices.get(0).getUuid());
-
+                sendDataToFragment("DATA Sending");
                 //соединяет и получает список сервисов
                 Log.d(TAG, "ok: ");
                 break;
@@ -94,9 +108,12 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
 
     }
 
+
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         Log.d(TAG, "onViewCreated: ");
         supportedServices=new ArrayList<BluetoothGattService>(); // сюда передам уникальные и дальше уже с ними работаю
 

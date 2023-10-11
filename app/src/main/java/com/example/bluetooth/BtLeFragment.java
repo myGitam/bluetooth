@@ -38,6 +38,7 @@ import androidx.core.view.MenuHost;
 import androidx.core.view.MenuProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -61,6 +62,7 @@ public class BtLeFragment extends Fragment {
     PairedDev device;
     List<BluetoothGattCharacteristic> characteristicsReadWrite;
     MenuHost menuHost; // для показа в шапке кнопки поиска
+
     private static final String TAG = "MyApp";
     List<BluetoothGattService> supportedServices; // переменная для хранения сервисов которые поддерживаеют только чтение и запись
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -70,7 +72,15 @@ public class BtLeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         menuHost=getActivity();
 
+       getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
+           @Override
+           public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+               String data = result.getString("key");
+               Log.d(TAG, "onFragmentResult: "+ data);
+           }
+       });
     }
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -229,7 +239,9 @@ public class BtLeFragment extends Fragment {
 //            @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false,
 //                    bluetoothGattCallback, TRANSPORT_LE);
             //Отображаю меню для выбора сервиса с которым нужно работать это для теста тут наеписано/ нужно переносить в правильное место
-            DialogFragment dialogFragment=new BleSelectServiceDialog(getContext(),pairedDev);
+
+            DialogFragment dialogFragment=new BleSelectServiceDialog(getActivity(),pairedDev);
+
             dialogFragment.show(getParentFragmentManager(),"Select Services");
 
 
@@ -356,6 +368,10 @@ public class BtLeFragment extends Fragment {
             btLe.stopScan();
         }
     }
+
+
+
+
 //создание меню - для кнопки поиска
 
 }

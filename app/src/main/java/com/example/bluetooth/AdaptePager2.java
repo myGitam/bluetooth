@@ -29,4 +29,5 @@ switch (position){
     public int getItemCount() {
         return 2;
     }
+
 }
