@@ -71,7 +71,7 @@ public class BtLeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         menuHost=getActivity();
-//подписываюсь на слушатель
+//подписываюсь на слушатель из диалог фаргмнета - чтоб получать тут сервис и характеристики которые выбрал
        getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
            @Override
            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {

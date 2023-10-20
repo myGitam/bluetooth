@@ -50,8 +50,8 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     PairedDev pairedDev;
 
     spinnerCustomServiceAdapter spinnerCustomServiceAdapterService;
-    spinnerCustomServiceAdapter spinnerCustomServiceAdapterRead;
-    spinnerCustomServiceAdapter spinnerCustomServiceAdapterWrite;
+    spinnerCustomCharacteristicAdapter spinnerCustomCharacteristicAdapterRead;
+    spinnerCustomCharacteristicAdapter spinnerCustomServiceAdapterWrite;
     Set<BluetoothGattService> set;
 
     //конструктор
@@ -63,7 +63,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     }
     /// Данные из диалога тут
 
-
+///////метод для отправки данных из диалога в фрагмент из которого вызван диалог
     private void sendDataToFragment(String data) {
         Bundle result = new Bundle();
         result.putString("key", data);
@@ -123,7 +123,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         spinnerCustomServiceAdapterService = new spinnerCustomServiceAdapter(this.getContext(),supportedServices);
         spinnerSelectRead=(Spinner) getView().findViewById(R.id.spinnerSelectReadChar);
         spinnerSelectRead.setClickable(false);
-        Сделать адаптер для характристик установить его
+        spinnerCustomCharacteristicAdapterRead = new spinnerCustomCharacteristicAdapter(this.getContext(),listReadChar);
     }
 
     @Override
