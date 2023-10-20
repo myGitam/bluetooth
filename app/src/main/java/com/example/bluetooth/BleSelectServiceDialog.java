@@ -6,10 +6,7 @@ import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 import static android.bluetooth.BluetoothGatt.GATT_FAILURE;
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
 
-import static androidx.viewpager.widget.PagerAdapter.POSITION_NONE;
-
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.widget.AdapterView;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
@@ -24,23 +21,17 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 
-import com.google.android.material.navigation.NavigationBarView;
-
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -48,20 +39,25 @@ import java.util.UUID;
 ///Класс для отображения диалогового окна для выбора сервисов для записи и чтения
 public class BleSelectServiceDialog extends DialogFragment implements View.OnClickListener {
     ArrayList<BluetoothGattService> supportedServices; // переменная для хранения сервисов которые поддерживаеют только чтение и запись
-
+    ArrayList<BluetoothGattCharacteristic> listReadChar; // переменная для хранения характеристики конуретного сервиса выбранного
+    ArrayList<BluetoothGattCharacteristic> listWriteChar; // переменная для хранения характеристики конуретного сервиса выбранного
     private static final String TAG = "MyApp";
     Context context;
-    Spinner spinner;
+    Spinner spinnerSelectService;
+    Spinner spinnerSelectRead;
+    Spinner spinnerSelectWrite;
     ArrayAdapter spinAdpt;
     PairedDev pairedDev;
 
-    spinnerCustomAdapter spinnerCustomAdapter;
+    spinnerCustomServiceAdapter spinnerCustomServiceAdapterService;
+    spinnerCustomServiceAdapter spinnerCustomServiceAdapterRead;
+    spinnerCustomServiceAdapter spinnerCustomServiceAdapterWrite;
     Set<BluetoothGattService> set;
 
     //конструктор
-    BleSelectServiceDialog (Context context, PairedDev pairedDev){
-        this.context=context;
-        this.pairedDev=pairedDev;
+    BleSelectServiceDialog(Context context, PairedDev pairedDev) {
+        this.context = context;
+        this.pairedDev = pairedDev;
 
         Log.d(TAG, "BleSelectServiceDialog: ");
     }
@@ -72,22 +68,23 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         Bundle result = new Bundle();
         result.putString("key", data);
         getParentFragmentManager().setFragmentResult("requestKey", result);
-      //  dismiss();
+        //  dismiss();
     }
 
     @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-    public  View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                              Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         getDialog().setTitle("Title!");
         View v = inflater.inflate(R.layout.blucchangecharacteristiclayout, null);
         v.findViewById(R.id.buttonOK).setOnClickListener(this::onClick);
         v.findViewById(R.id.buttonCanc).setOnClickListener(this::onClick);
         v.findViewById(R.id.spinnerSelectservice);
+        v.findViewById(R.id.spinnerSelectReadChar);
+        v.findViewById(R.id.spinnerSelectWriteChar);
 
         return v;
     }
-
 
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -95,7 +92,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.buttonOK:
-                Log.d(TAG, "property READ/WRITE ALL:- "+ " "+ supportedServices.get(0).getUuid());
+                Log.d(TAG, "property READ/WRITE ALL:- " + " " + supportedServices.get(0).getUuid());
                 sendDataToFragment("DATA Sending");
                 //соединяет и получает список сервисов
                 Log.d(TAG, "ok: ");
@@ -109,72 +106,77 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     }
 
 
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         Log.d(TAG, "onViewCreated: ");
-        supportedServices=new ArrayList<BluetoothGattService>(); // сюда передам уникальные и дальше уже с ними работаю
-
+        supportedServices = new ArrayList<BluetoothGattService>(); // сюда передам уникальные и дальше уже с ними работаю
+        listReadChar =new ArrayList<BluetoothGattCharacteristic>(); // сюда передам доступные характеристики
+        listWriteChar =new ArrayList<BluetoothGattCharacteristic>(); // сюда передам доступные характеристики
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false, bluetoothGattCallback, TRANSPORT_LE);
         }
 
-        spinner=(Spinner) getView().findViewById(R.id.spinnerSelectservice);
-        spinner.setClickable(false);
-        spinnerCustomAdapter=new spinnerCustomAdapter(this.getContext(),supportedServices);
-
+        spinnerSelectService = (Spinner) getView().findViewById(R.id.spinnerSelectservice);
+        spinnerSelectService.setClickable(false);
+        spinnerCustomServiceAdapterService = new spinnerCustomServiceAdapter(this.getContext(),supportedServices);
+        spinnerSelectRead=(Spinner) getView().findViewById(R.id.spinnerSelectReadChar);
+        spinnerSelectRead.setClickable(false);
+        Сделать адаптер для характристик установить его
     }
 
     @Override
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume: ");
-        spinnerCustomAdapter.notifyDataSetChanged();
-        spinAdpt=new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item,supportedServices);
-        spinner.setAdapter(spinnerCustomAdapter);
-        spinner.setSelection(0);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spinnerCustomServiceAdapterService.notifyDataSetChanged();
+      //  spinAdpt = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, supportedServices);
+        spinnerSelectService.setAdapter(spinnerCustomServiceAdapterService);
+        spinnerSelectService.setSelection(0);
+        spinnerSelectService.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                spinner.setSelection(position);
+                spinnerSelectService.setSelection(position);
+                cheakCharacteristicforService(supportedServices.get(position));
+                Log.d(TAG, "onItemSelected: ");
+               // spinnerSelectRead.setAdapter(spinnerCustomAdapterRead);
+               // spinnerSelectRead.setSelection(position);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                spinner.setSelection(0);
+                spinnerSelectService.setSelection(0);
             }
         });
     }
-
 
 
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
         Log.d(TAG, "onDismiss: ");
     }
+
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
         Log.d(TAG, "onCancel: ");
     }
 
 
-
-
     @SuppressLint("NewApi")
-    private final BluetoothGattCallback bluetoothGattCallback=new BluetoothGattCallback() {
+    private final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
 
         @SuppressLint("MissingPermission")
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
-            if(status == GATT_SUCCESS) {
+            if (status == GATT_SUCCESS) {
                 if (newState == BluetoothGatt.STATE_CONNECTED) {
                     // Connected to the device, start discovering services
                     //Получаю статус подключения состояние сопряжения
                     int bondstate = pairedDev.getPairBluDev().getBondState();
-                    if(bondstate == BOND_NONE || bondstate == BOND_BONDED) {
+                    if (bondstate == BOND_NONE || bondstate == BOND_BONDED) {
                         // Подключились к устройству, вызываем discoverServices с задержкой
                         gatt.discoverServices();
 
@@ -189,8 +191,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
                 } else {
                     // мы или подключаемся или отключаемся, просто игнорируем эти статусы
                 }
-            }
-            else {
+            } else {
                 // Произошла ошибка... разбираемся, что случилось!
                 Log.d(TAG, "Error connect: ");
                 gatt.close();
@@ -216,12 +217,12 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
                 //получаю список сервисов
                 final List<BluetoothGattService> services = gatt.getServices(); /// получаю список найденныс сервисов
 
-                Log.d(TAG, "services: "+ services.size());
+                Log.d(TAG, "services: " + services.size());
                 int index = 0; ///просто задаю индексацию для себя чтоб понимать какой сервис в лог выводит
                 //перебираю все сервисы цыклом и сразу в цикле проверяю характеристики на наличие возможности чтения/записи
-                for (BluetoothGattService s:services){
+                for (BluetoothGattService s : services) {
                     index++;
-                    Log.d(TAG, "serviceUUID: "+index +": "+s.getUuid());
+                    Log.d(TAG, "serviceUUID: " + index + ": " + s.getUuid());
 
                     //получаю список характеристик в сервисе
                     List<BluetoothGattCharacteristic> characteristics = s.getCharacteristics();
@@ -229,31 +230,23 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
                     // в этом цикле проверяю есть ли у сервиса нужные мне хзарактеристики если есть то я этот сервис запишу в отдельный список только сервисов которые поддерживают то что мне нужно
                     for (BluetoothGattCharacteristic characteristic : characteristics) {
                         // Получаю UUID характеристики конкретной
-                        UUID value =characteristic.getUuid();
-                        Log.d(TAG, "UUID  value characteristic: "+ value);
+                        UUID value = characteristic.getUuid();
+                        Log.d(TAG, "UUID  value characteristic: " + value);
 
                         int property = characteristic.getProperties(); // переменная чтоб понять характеристика для записи или для чтения
-                        if(((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY)>0) && ((property & BluetoothGattCharacteristic.PROPERTY_WRITE)>0)){
+                        if (((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) && ((property & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0)) {
                             // characteristicsReadWrite.add(characteristic);
-                            Log.d(TAG, "property READ/WRITE add to supportedServices: " );
-                          supportedServices.add(s);
-                          break;
+                            Log.d(TAG, "property READ/WRITE add to supportedServices: ");
+                            supportedServices.add(s);
+                            break;
                         }
-                        // проверха характеристики для записи или для чтения
-//                         if ((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
-//                             Log.d(TAG, "property READ "+ ""+property );
-//                         }
-//                         if ((property & (BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE | BluetoothGattCharacteristic.PROPERTY_WRITE)) > 0) {
-//                             Log.d(TAG, "property: "+ "WRITE"+ property  );
-//                         }
-
 
                     }
 
                 }
                 //вывожу списко устройств чтение запись
-                for(BluetoothGattService ser:supportedServices){
-                    Log.d(TAG, "property READ/WRITE ALL:- "+ " "+ ser.getUuid());
+                for (BluetoothGattService ser : supportedServices) {
+                    Log.d(TAG, "property READ/WRITE ALL:- " + " " + ser.getUuid());
 
                 }
 
@@ -265,41 +258,59 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         }
 
     };
-             ///метод для обновления спинера, запусккаю в нем поток и в случае изменгения шлю уведомление в слушатель хандлера
-               public void updateSpinnerData(ArrayList<BluetoothGattService>  supportedServices) {
-                   udpadeSpinHandler.post(new Runnable() {
-                       private static final String TAG = "spinerHandler start";
-                       @Override
-                       public void run() {
-                           if (!supportedServices.isEmpty()){udpadeSpinHandler.sendEmptyMessage(1);
-                               Log.d(TAG, "updateSpinnerData: ");
-                               Log.d(TAG, "updateSpinnerData: " + getLifecycle().toString());
-                           }
-                           else {
-                               Log.d(TAG, "run: EMPTY supportedServices");
-                           }
-                       }
-                   });
 
-               // spinAdpt.clear();
+    ///метод для обновления спинера, запусккаю в нем поток и в случае изменгения шлю уведомление в слушатель хандлера
+    public void updateSpinnerData(ArrayList<BluetoothGattService> supportedServices) {
+        udpadeSpinHandler.post(new Runnable() {
+            private static final String TAG = "spinerHandler start";
 
+            @Override
+            public void run() {
+                if (!supportedServices.isEmpty()) {
+                    udpadeSpinHandler.sendEmptyMessage(1);
+                    Log.d(TAG, "updateSpinnerData: ");
+                    Log.d(TAG, "updateSpinnerData: " + getLifecycle().toString());
+                } else {
+                    Log.d(TAG, "run: EMPTY supportedServices");
+                }
             }
+        });
 
-    Handler udpadeSpinHandler=new Handler(Looper.getMainLooper()){
+        // spinAdpt.clear();
+
+    }
+
+    Handler udpadeSpinHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            if(msg.what==1){
+            if (msg.what == 1) {
                 Log.d(TAG, "handleMessage: 1");
-                spinnerCustomAdapter.notifyDataSetChanged();
+                spinnerCustomServiceAdapterService.notifyDataSetChanged();
 
-                spinAdpt.notifyDataSetChanged();
-                spinner.setAdapter(spinnerCustomAdapter);
-                spinner.setSelection(0, true);
+                //spinAdpt.notifyDataSetChanged();
+                spinnerSelectService.setAdapter(spinnerCustomServiceAdapterService);
+                spinnerSelectService.setSelection(0, true);
 
             }
         }
     };
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+    private void cheakCharacteristicforService(BluetoothGattService service) {
+        // проверха характеристики для записи или для чтения
+        List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
+        for (BluetoothGattCharacteristic characteristic : characteristics) {
+            int property = characteristic.getProperties(); // переменная чтоб понять характеристика для записи или для чтения
+            if ((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+                Log.d(TAG, "property READ " + "" + property);
+                listReadChar.add(characteristic);
+            }
+            if ((property & (BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE | BluetoothGattCharacteristic.PROPERTY_WRITE)) > 0) {
+                Log.d(TAG, "property: " + "WRITE" + property+characteristic.getUuid());
+                listWriteChar.add(characteristic);
+            }
+        }
+    }
 
 }

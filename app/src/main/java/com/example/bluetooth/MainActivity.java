@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, delimeterArray);
         // Определяем разметку для использования при выборе элемента
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Применяем адаптер к элементу spinner
+        // Применяем адаптер к элементу spinnerSelectService
         spinner.setAdapter(spinnerAdapter);
 
         ///////******////////*********

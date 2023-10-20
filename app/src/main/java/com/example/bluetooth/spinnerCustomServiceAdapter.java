@@ -1,5 +1,6 @@
 package com.example.bluetooth;
 
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.os.Build;
@@ -14,22 +15,21 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
-public class spinnerCustomAdapter extends BaseAdapter {
+public class spinnerCustomServiceAdapter extends BaseAdapter {
     private static final String TAG = "MyApp";
     Context context;
-    ArrayList<BluetoothGattService>  supportedServices ;
-
+    ArrayList <BluetoothGattService>  supportedServices ;
+    ArrayList<BluetoothGattCharacteristic>  supportedHaracteristic ;
     LayoutInflater inflter;
-    public spinnerCustomAdapter(Context appContex, ArrayList<BluetoothGattService> supportedServices ) {
+    public spinnerCustomServiceAdapter(Context appContex, ArrayList<BluetoothGattService> supportedServices ) {
         this.supportedServices = new ArrayList<>();
 
         this.supportedServices=supportedServices;
         this.context=appContex;
         inflter = (LayoutInflater.from(this.context));
     }
+
 
     @Override
     public int getCount() {
