@@ -141,7 +141,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
                 spinnerSelectService.setSelection(position);
                 cheakCharacteristicforService(supportedServices.get(position));
                 Log.d(TAG, "onItemSelected: ");
-               // spinnerSelectRead.setAdapter(spinnerCustomAdapterRead);
+                spinnerSelectRead.setAdapter(spinnerCustomCharacteristicAdapterRead);
                // spinnerSelectRead.setSelection(position);
             }
 
