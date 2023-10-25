@@ -43,15 +43,15 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     ArrayList<BluetoothGattCharacteristic> listWriteChar; // переменная для хранения характеристики конуретного сервиса выбранного
     private static final String TAG = "MyApp";
     Context context;
-    Spinner spinnerSelectService;
-    Spinner spinnerSelectRead;
-    Spinner spinnerSelectWrite;
+    Spinner spinnerSelectService; // Для сервисов сспинер
+    Spinner spinnerSelectRead; // спинер для характеристик на чтение
+    Spinner spinnerSelectWrite; //синер для характеристик на запись
     ArrayAdapter spinAdpt;
     PairedDev pairedDev;
 
-    spinnerCustomServiceAdapter spinnerCustomServiceAdapterService;
-    spinnerCustomCharacteristicAdapter spinnerCustomCharacteristicAdapterRead;
-    spinnerCustomCharacteristicAdapter spinnerCustomServiceAdapterWrite;
+    spinnerCustomServiceAdapter spinnerCustomServiceAdapterService; //Адаптер для сервисов
+    spinnerCustomCharacteristicAdapter spinnerCustomCharacteristicAdapterRead; // адаптер для спинера для характеристик чтение запись один и тот же
+    spinnerCustomCharacteristicAdapter spinnerCustomServiceAdapterWrite; // адаптер для спинера для характеристик чтение запись один и тот же
     Set<BluetoothGattService> set;
 
     //конструктор
@@ -64,9 +64,9 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     /// Данные из диалога тут
 
 ///////метод для отправки данных из диалога в фрагмент из которого вызван диалог
-    private void sendDataToFragment(String data) {
+    private void sendDataToFragment(String key, String data) {
         Bundle result = new Bundle();
-        result.putString("key", data);
+        result.putString(key, data);
         getParentFragmentManager().setFragmentResult("requestKey", result);
         //  dismiss();
     }
@@ -93,7 +93,9 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         switch (v.getId()) {
             case R.id.buttonOK:
                 Log.d(TAG, "property READ/WRITE ALL:- " + " " + supportedServices.get(0).getUuid());
-                sendDataToFragment("DATA Sending");
+                sendDataToFragment("DATA Sending1");
+                sendDataToFragment("DATA Sending2");
+                sendDataToFragment("DATA Sending3");
                 //соединяет и получает список сервисов
                 Log.d(TAG, "ok: ");
                 break;
@@ -120,10 +122,13 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
 
         spinnerSelectService = (Spinner) getView().findViewById(R.id.spinnerSelectservice);
         spinnerSelectService.setClickable(false);
-        spinnerCustomServiceAdapterService = new spinnerCustomServiceAdapter(this.getContext(),supportedServices);
+        spinnerCustomServiceAdapterService = new spinnerCustomServiceAdapter(this.getContext(),supportedServices); // указываю список спинеру для сервисов
         spinnerSelectRead=(Spinner) getView().findViewById(R.id.spinnerSelectReadChar);
-        spinnerSelectRead.setClickable(false);
-        spinnerCustomCharacteristicAdapterRead = new spinnerCustomCharacteristicAdapter(this.getContext(),listReadChar);
+        spinnerSelectRead.setClickable(false); // настройка спенера чтоб нажмалось
+        spinnerCustomCharacteristicAdapterRead = new spinnerCustomCharacteristicAdapter(this.getContext(),listReadChar); // Заполняю адаптер спинера для характеристик на чтение
+        spinnerSelectWrite=(Spinner) getView().findViewById(R.id.spinnerSelectWriteChar);
+        spinnerSelectWrite.setClickable(false);
+        spinnerCustomServiceAdapterWrite=new spinnerCustomCharacteristicAdapter(this.getContext(),listWriteChar); // Заполняю адаптер спинера для характеристик на запись
     }
 
     @Override
@@ -142,7 +147,8 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
                 cheakCharacteristicforService(supportedServices.get(position));
                 Log.d(TAG, "onItemSelected: ");
                 spinnerSelectRead.setAdapter(spinnerCustomCharacteristicAdapterRead);
-               // spinnerSelectRead.setSelection(position);
+                spinnerSelectWrite.setAdapter(spinnerCustomServiceAdapterWrite);
+
             }
 
             @Override
@@ -300,6 +306,8 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     private void cheakCharacteristicforService(BluetoothGattService service) {
         // проверха характеристики для записи или для чтения
         List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
+        listReadChar.clear();
+        listWriteChar.clear();
         for (BluetoothGattCharacteristic characteristic : characteristics) {
             int property = characteristic.getProperties(); // переменная чтоб понять характеристика для записи или для чтения
             if ((property & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
