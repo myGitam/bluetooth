@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
@@ -46,6 +47,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     Spinner spinnerSelectService; // Для сервисов сспинер
     Spinner spinnerSelectRead; // спинер для характеристик на чтение
     Spinner spinnerSelectWrite; //синер для характеристик на запись
+    ProgressBar progressBarService;
     ArrayAdapter spinAdpt;
     PairedDev pairedDev;
 
@@ -93,9 +95,12 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         switch (v.getId()) {
             case R.id.buttonOK:
                 Log.d(TAG, "property READ/WRITE ALL:- " + " " + supportedServices.get(0).getUuid());
-                sendDataToFragment("DATA Sending1");
-                sendDataToFragment("DATA Sending2");
-                sendDataToFragment("DATA Sending3");
+                BluetoothGattService service= (BluetoothGattService) spinnerSelectService.getSelectedItem();
+                BluetoothGattCharacteristic reed = (BluetoothGattCharacteristic)spinnerSelectRead.getSelectedItem();
+                BluetoothGattCharacteristic write = (BluetoothGattCharacteristic)spinnerSelectWrite.getSelectedItem();
+                sendDataToFragment("Service",service.getUuid().toString());
+                sendDataToFragment("Read",reed.getUuid().toString());
+                sendDataToFragment("Write",write.getUuid().toString());
                 //соединяет и получает список сервисов
                 Log.d(TAG, "ok: ");
                 break;
@@ -111,7 +116,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        progressBarService=view.findViewById(R.id.progressBarService);
         Log.d(TAG, "onViewCreated: ");
         supportedServices = new ArrayList<BluetoothGattService>(); // сюда передам уникальные и дальше уже с ними работаю
         listReadChar =new ArrayList<BluetoothGattCharacteristic>(); // сюда передам доступные характеристики
@@ -119,7 +124,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             @SuppressLint("MissingPermission") BluetoothGatt gatt = pairedDev.getPairBluDev().connectGatt(getContext(), false, bluetoothGattCallback, TRANSPORT_LE);
         }
-
+        progressBarService.setVisibility(View.VISIBLE);
         spinnerSelectService = (Spinner) getView().findViewById(R.id.spinnerSelectservice);
         spinnerSelectService.setClickable(false);
         spinnerCustomServiceAdapterService = new spinnerCustomServiceAdapter(this.getContext(),supportedServices); // указываю список спинеру для сервисов
@@ -297,7 +302,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
                 //spinAdpt.notifyDataSetChanged();
                 spinnerSelectService.setAdapter(spinnerCustomServiceAdapterService);
                 spinnerSelectService.setSelection(0, true);
-
+                progressBarService.setVisibility(View.INVISIBLE);
             }
         }
     };

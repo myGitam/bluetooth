@@ -62,7 +62,9 @@ public class BtLeFragment extends Fragment {
     PairedDev device;
     List<BluetoothGattCharacteristic> characteristicsReadWrite;
     MenuHost menuHost; // для показа в шапке кнопки поиска
-
+    String Service;
+    String Read;
+    String Write;
     private static final String TAG = "MyApp";
     List<BluetoothGattService> supportedServices; // переменная для хранения сервисов которые поддерживаеют только чтение и запись
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -74,9 +76,17 @@ public class BtLeFragment extends Fragment {
 //подписываюсь на слушатель из диалог фаргмнета - чтоб получать тут сервис и характеристики которые выбрал
        getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
            @Override
-           public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-               String data = result.getString("key");
-               Log.d(TAG, "onFragmentResult: "+ data);
+           public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {          //Получаю сервис и характеристики к которым хочу подключиться и читать/писать
+               if(result.getString("Service")!=null) {
+                   Service = result.getString("Service");
+               }
+               if (result.getString("Read")!=null) {
+                   Read = result.getString("Read");
+               }
+               if(result.getString("Write")!=null) {
+                   Write = result.getString("Write");
+               }
+               Log.d(TAG, "Service: \\n "+ Service + "Read: \\n " + Read + "Write: \\n "+ Write);
            }
        });
     }
