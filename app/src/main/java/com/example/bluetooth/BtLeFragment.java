@@ -4,6 +4,7 @@ import static android.bluetooth.BluetoothDevice.BOND_BONDED;
 import static android.bluetooth.BluetoothDevice.BOND_NONE;
 import static android.bluetooth.BluetoothDevice.TRANSPORT_LE;
 import static android.bluetooth.BluetoothGatt.GATT_FAILURE;
+import static android.bluetooth.BluetoothGatt.GATT_READ_NOT_PERMITTED;
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
 
 import android.annotation.SuppressLint;
@@ -77,16 +78,15 @@ public class BtLeFragment extends Fragment {
        getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
            @Override
            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {          //Получаю сервис и характеристики к которым хочу подключиться и читать/писать
-               if(result.getString("Service")!=null) {
-                   Service = result.getString("Service");
+               if(result.getString("OK")!=null) {
+                   Log.d(TAG, "onFragmentResult: " + result.getString("OK"));
                }
-               if (result.getString("Read")!=null) {
-                   Read = result.getString("Read");
+               if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                   BtleConnectedClass gatt=BtleConnectedClass.getInstance();
+              //     gatt.read(gatt.getRead());
+
                }
-               if(result.getString("Write")!=null) {
-                   Write = result.getString("Write");
-               }
-               Log.d(TAG, "Service: \\n "+ Service + "Read: \\n " + Read + "Write: \\n "+ Write);
+
            }
        });
     }
