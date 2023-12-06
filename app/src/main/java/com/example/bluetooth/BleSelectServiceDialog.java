@@ -187,6 +187,7 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
         Log.d(TAG, "onCancel: ");
+
     }
 
 

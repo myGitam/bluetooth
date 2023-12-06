@@ -30,7 +30,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -175,23 +177,37 @@ public class BtleConnectedClass {
            super.onCharacteristicRead(gatt, characteristic, value, status);
             Log.d(TAG, "onCharacteristicReadCallback: " + value.toString());
         }
+
+        @SuppressLint("MissingPermission")
         @Deprecated
         @Override
         public void onCharacteristicRead (BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status){
-         String value=characteristic.getStringValue(0);
-            Log.d(TAG, "onCharacteristicRead Deprecated: " + value);
-        }
 
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+
+
+            }
+        }
+        //метод для новых версий
         @Override
         public void onCharacteristicChanged(@NonNull BluetoothGatt gatt, @NonNull BluetoothGattCharacteristic characteristic, @NonNull byte[] value) {
             super.onCharacteristicChanged(gatt, characteristic, value);
-            Log.d(TAG, "onCharacteristicChanged: ");
+            Log.d(TAG, "onCharacteristicChanged Changed New: ");
             }
+        @SuppressLint("MissingPermission")
         @Deprecated
         @Override
+        //метод до 13 андроида
+        //При изменении характеристики, копирую данные сразу в переменную. и делаю с ними что хочу. Потому что если это не сделать они могут пропасть.
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
-            Log.d(TAG, "onCharacteristicChanged Deprecated: ");
+            Log.d(TAG, "onCharacteristicChanged Changed Old: " + characteristic.getUuid().toString());
+
+            final byte[] value = new byte[characteristic.getValue().length];
+            System.arraycopy(characteristic.getValue(), 0, value, 0, characteristic.getValue().length); //копирую
+            Log.d(TAG, "onCharacteristicChanged length: "+ value.length);
+            String s = new String(value, StandardCharsets.UTF_8);
+            Log.d(TAG, "onCharacteristicChanged data: "+ s);
         }
 
         @Override
@@ -312,8 +328,9 @@ public class BtleConnectedClass {
 
 
 
+    public  void unsubscribe(){
 
-
+    }
     public BluetoothGattService getService() {
         return service;
     }
@@ -337,5 +354,6 @@ public class BtleConnectedClass {
     public void setWrite(BluetoothGattCharacteristic write) {
         this.write = write;
     }
+
 
 }
