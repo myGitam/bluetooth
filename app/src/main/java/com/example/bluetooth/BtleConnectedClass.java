@@ -7,6 +7,12 @@ import static android.bluetooth.BluetoothGatt.GATT_FAILURE;
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
 import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_INDICATE;
 import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_NOTIFY;
+import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_SIGNED_WRITE;
+import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_WRITE;
+import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE;
+import static android.bluetooth.BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT;
+import static android.bluetooth.BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE;
+import static android.bluetooth.BluetoothGattCharacteristic.WRITE_TYPE_SIGNED;
 import static android.bluetooth.BluetoothProfile.STATE_CONNECTED;
 
 import android.annotation.SuppressLint;
@@ -34,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 
@@ -147,7 +154,7 @@ public class BtleConnectedClass {
                         Log.d(TAG, "UUID  value characteristic: " + value);
 
                         int property = characteristic.getProperties(); // переменная чтоб понять характеристика для записи или для чтения
-                        if (((property & PROPERTY_NOTIFY) > 0) && ((property & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0)) {
+                        if (((property & PROPERTY_NOTIFY) > 0) && ((property & PROPERTY_WRITE) > 0)) {
                             // characteristicsReadWrite.add(characteristic);
                             Log.d(TAG, "property READ/WRITE add to supportedServices: ");
                             supportedServices.add(s);
@@ -166,7 +173,7 @@ public class BtleConnectedClass {
             }
 
 
-            updateSpinnerData(supportedServices);
+            updateSpinnerData(supportedServices); // метод для обновления данных в спинере
         }
 
         ////Тестирую функцию чтения это колбек
@@ -204,14 +211,14 @@ public class BtleConnectedClass {
             Log.d(TAG, "onCharacteristicChanged Changed Old: " + characteristic.getUuid().toString());
 
             final byte[] value = new byte[characteristic.getValue().length];
-            System.arraycopy(characteristic.getValue(), 0, value, 0, characteristic.getValue().length); //копирую
+            System.arraycopy(characteristic.getValue(), 0, value, 0, characteristic.getValue().length); //копирую то что пришло, так нжно иначе не работает
             Log.d(TAG, "onCharacteristicChanged length: "+ value.length);
             String s = new String(value, StandardCharsets.UTF_8);
             Log.d(TAG, "onCharacteristicChanged data: "+ s);
         }
 
         @Override
-        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) { //Метод для записи дескриптора
             super.onDescriptorWrite(gatt, descriptor, status);
             final BluetoothGattCharacteristic parentCharacteristic = descriptor.getCharacteristic();
 
@@ -282,15 +289,15 @@ public class BtleConnectedClass {
         connectedState = manager.getConnectionState(device, BluetoothProfile.GATT);
         Log.d(TAG, "connectedState " + connectedState);
         if (connectedState == STATE_CONNECTED) {
-            if ((properties & PROPERTY_NOTIFY) > 0) {
+            if ((properties & PROPERTY_NOTIFY) > 0) {                     //определяю тип уведомления характеристики
                 Log.d(TAG, "read: " + "PROPERTY_NOTIFY");
                 value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;
                 descriptor.setValue(value);
                 Log.d(TAG, "value: " + value.toString());
-            } else if ((properties & PROPERTY_INDICATE) > 0) {
+            } else if ((properties & PROPERTY_INDICATE) > 0) { //определяю тип уведомления характеристики
                 Log.d(TAG, "read: " + "PROPERTY_INDICATE");
                 value = BluetoothGattDescriptor.ENABLE_INDICATION_VALUE;
-                descriptor.setValue(value);
+                descriptor.setValue(value); //записываю в дескриптор тип уведомления
 
             } else {
                 Log.e(TAG, String.format("ERROR: Characteristic %s does not have notify or indicate property", characteristic.getUuid()));
@@ -298,14 +305,35 @@ public class BtleConnectedClass {
             }
             gatt.writeDescriptor(descriptor);
             Log.d(TAG, "setCharacteristicNotification: " + characteristic.getUuid().toString());
-            gatt.setCharacteristicNotification(characteristic, true);
+            gatt.setCharacteristicNotification(characteristic, true); // Указываю что должен мониторить эту характеристику для чтения
 
             Log.d(TAG, "setCharacteristicNotification: "+gatt.setCharacteristicNotification(characteristic, true));
             Log.d(TAG, "descriptor: " + characteristic.getDescriptor(CHARACTERISTIC_UPDATE_NOTIFICATION_DESCRIPTOR_UUID).getUuid().toString());
         }
     }
+    @SuppressLint("MissingPermission")
+ public void write (BluetoothGattCharacteristic characteristic){
+        //Перед записью проверить характеристику, поддерживает ли она нужный тип записи
+        // Check if this characteristic actually supports this writeType
+        int writeProperty = characteristic.getProperties();
+        int mWriteType;
+        if ((writeProperty  & PROPERTY_WRITE_NO_RESPONSE) != 0) {
+            mWriteType = WRITE_TYPE_NO_RESPONSE;
+        } else {
+            mWriteType = PROPERTY_WRITE;
+        }
 
+        byte[] bytesToWrite="новая строка".getBytes(StandardCharsets.UTF_8);
+        characteristic.setValue(bytesToWrite);
+        characteristic.setWriteType(mWriteType);
+        if (!gatt.writeCharacteristic(characteristic)) {
+            Log.e(TAG, String.format("ERROR: writeCharacteristic failed for characteristic:", characteristic.getUuid()));
 
+        } else {
+            String s = new String(bytesToWrite, StandardCharsets.UTF_8);
+            Log.d(TAG, "write: "+s);
+        }
+ }
       @SuppressLint("MissingPermission")
       public void readManual(BluetoothGattCharacteristic characteristic){
           characteristic = gatt.getService(service.getUuid()).getCharacteristic(characteristic.getUuid());

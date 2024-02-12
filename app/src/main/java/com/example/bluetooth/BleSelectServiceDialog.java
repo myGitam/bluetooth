@@ -111,7 +111,8 @@ public class BleSelectServiceDialog extends DialogFragment implements View.OnCli
                 //соединяет и получает список сервисов
                 sendDataToFragment("OK","OK");
                 Log.d(TAG, "ok: ");
-               bTLegatt.read(read); /// Это просто тест будет читать или нет
+               //bTLegatt.read(read); /// Это просто тест будет читать или нет
+                bTLegatt.write(write);
                 //bTLegatt.readManual(service.getCharacteristic(read.getUuid()));
                // this.getDialog().cancel();
                 break;
